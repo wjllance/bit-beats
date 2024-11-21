@@ -1,8 +1,33 @@
+import { useState, useEffect } from 'react';
+
 interface PriceDisplayProps {
   currentPrice: number | null;
 }
 
+const SLOGANS = [
+  "Watch Bitcoin Rise to the Top",
+  "Ride the Digital Gold Wave",
+  "The Future of Finance is Here",
+  "Decentralized. Secure. Revolutionary.",
+  "Beyond Traditional Boundaries",
+  "Financial Freedom Awaits",
+  "Join the Crypto Revolution",
+  "Where Innovation Meets Value",
+  "Empowering Digital Wealth",
+  "The Beat of Digital Currency"
+];
+
 export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
+  const [currentSlogan, setCurrentSlogan] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlogan((prev) => (prev + 1) % SLOGANS.length);
+    }, 5000); // Change slogan every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -53,10 +78,10 @@ export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
         )}
       </div>
 
-      {/* Right: Slogan */}
-      <div className="flex items-center">
-        <p className="text-yellow-500 text-base">
-          Watch Bitcoin Rise to the Top
+      {/* Right: Rotating Slogan */}
+      <div className="w-[300px] flex items-center justify-end">
+        <p className="text-yellow-500 text-base transition-all duration-500 text-right">
+          {SLOGANS[currentSlogan]}
         </p>
       </div>
     </div>
