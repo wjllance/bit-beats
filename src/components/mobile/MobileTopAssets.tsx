@@ -1,7 +1,9 @@
 import { useMarketData } from '../../hooks/useMarketData';
 
 const formatMarketCap = (marketCap: number): string => {
-  if (marketCap >= 1e12) {
+  if (marketCap === null || marketCap === undefined) {
+    return '';
+  } else if (marketCap >= 1e12) {
     return `$${(marketCap / 1e12).toFixed(2)}T`;
   } else if (marketCap >= 1e9) {
     return `$${(marketCap / 1e9).toFixed(2)}B`;
@@ -61,7 +63,7 @@ export default function MobileTopAssets() {
                       <span className="text-gray-400 text-xs">{asset.type}</span>
                     </div>
                     <span className="text-gray-400 text-xs">
-                      {formatMarketCap(asset.marketCap)}
+                      {formatMarketCap(asset.market_cap)}
                     </span>
                   </div>
                 </div>
@@ -70,24 +72,24 @@ export default function MobileTopAssets() {
                     <span
                       className="text-sm"
                     >
-                      ${asset.currentPrice.toLocaleString()}
+                      ${asset.current_price.toLocaleString()}
                     </span>
                     <span
                       className="ml-2 text-xs"
                     >
-                      {asset.priceChange24h >= 0 ? '+' : ''}
-                      {asset.priceChange24h.toFixed(2)}%
+                      {asset.price_change_percentage_24h >= 0 ? '+' : ''}
+                      {asset.price_change_percentage_24h.toFixed(2)}%
                     </span>
                   </div>
                   <div 
                     className={`text-xs flex items-center space-x-1 ${
-                      asset.priceChange24h >= 0 
+                      asset.price_change_percentage_24h >= 0 
                         ? 'text-green-400' 
                         : 'text-red-400'
                     }`}
                   >
                     <span className="transition-transform group-active:scale-110">
-                      {asset.priceChange24h >= 0 ? '↑' : '↓'}
+                      {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
                     </span>
                   </div>
                 </div>

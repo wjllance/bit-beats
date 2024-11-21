@@ -13,9 +13,9 @@ export type Asset = {
   id: string;
   name: string;
   symbol: string;
-  currentPrice: number;
-  priceChange24h: number;
-  marketCap: number;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
   type: 'crypto' | 'stock' | 'commodity';
 };
 

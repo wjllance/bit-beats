@@ -57,9 +57,9 @@ export function useMarketData(): UseMarketDataReturn {
           id: coin.id,
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
-          currentPrice: coin.current_price,
-          priceChange24h: coin.price_change_percentage_24h,
-          marketCap: coin.market_cap,
+          current_price: coin.current_price,
+          price_change_percentage_24h: coin.price_change_percentage_24h,
+          market_cap: coin.market_cap,
           type: 'crypto',
         }));
 
@@ -68,7 +68,7 @@ export function useMarketData(): UseMarketDataReturn {
         const { stocks, commodities } = marketResponse.data;
 
         const allAssets = [...cryptoAssets, ...stocks, ...commodities]
-          .sort((a, b) => b.marketCap - a.marketCap)
+          .sort((a, b) => b.market_cap - a.market_cap)
           .slice(0, 10);
 
         setAssets(allAssets);

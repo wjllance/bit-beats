@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Asset } from '../types';
 
 // Constants for market data
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -25,15 +26,6 @@ const API_ENDPOINTS = {
   METAL_PRICE: 'https://api.metalpriceapi.com/v1',
 };
 
-interface Asset {
-  id: string;
-  name: string;
-  symbol: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  type: 'crypto' | 'stock' | 'commodity';
-}
 
 interface CoinGeckoResponse {
   id: string;
