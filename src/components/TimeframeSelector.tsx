@@ -24,7 +24,7 @@ export default function TimeframeSelector({
           key={timeframe.label}
           onClick={() => onTimeframeChange(timeframe)}
           className={`timeframe-button ${
-            timeframe.label === selectedTimeframe.label ? 'active' : ''
+            timeframe.label === selectedTimeframe?.label ? 'active' : ''
           }`}
         >
           {timeframe.label}
