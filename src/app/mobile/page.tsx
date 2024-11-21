@@ -58,46 +58,74 @@ export default function MobilePage() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
         <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                <span className="text-gray-900 font-bold">₿</span>
+          {/* Title Section */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                <span className="text-gray-900 text-xl font-bold">₿</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text tracking-tight">
                   BTC Beats
                 </h1>
               </div>
             </div>
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-medium text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
+                BTC/USD
+              </span>
+              <span className="text-[10px] text-gray-500 mt-0.5">
+                {new Date().toLocaleDateString()}
+              </span>
+            </div>
           </div>
           
-          <div className="mt-1">
+          {/* Slogan */}
+          <div className="mb-3">
             <p className={clsx(
-              "text-sm text-gray-400 transition-opacity duration-500",
+              "text-sm text-gray-400 transition-opacity duration-500 text-center",
               isTransitioning ? "opacity-0" : "opacity-100"
             )}>
               {SLOGANS[currentSlogan]}
             </p>
           </div>
 
-          {/* Current Price */}
-          <div className="mt-2 flex items-baseline space-x-2">
+          {/* Price Display */}
+          <div className="bg-gray-800/30 rounded-xl p-3">
             {error ? (
               <span className="text-sm text-red-400">{error}</span>
             ) : (
-              <>
-                <span className={`text-2xl font-bold ${isLoading ? 'animate-pulse' : ''}`}>
-                  ${formatPrice(currentPrice)}
-                </span>
-                {priceChange !== null && (
-                  <span className={`text-sm font-medium ${
-                    priceChange >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {priceChange >= 0 ? '↑' : '↓'}
-                    {Math.abs(priceChange).toFixed(2)}%
+              <div className="space-y-1">
+                <div className="flex items-baseline justify-between">
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-2xl font-bold text-white">
+                      ${formatPrice(currentPrice)}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className={clsx(
+                      "w-2 h-2 rounded-full",
+                      isLoading ? "bg-yellow-500 animate-pulse" : "bg-green-500"
+                    )} />
+                    <span className="text-xs text-gray-400">
+                      {isLoading ? "Updating..." : "Live"}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">
+                    Last updated: {new Date().toLocaleTimeString()}
                   </span>
-                )}
-              </>
+                  <div className="flex items-center space-x-1 text-xs">
+                    <span className={clsx(
+                      "px-2 py-0.5 rounded-full font-medium",
+                      priceChange >= 0 ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                    )}>
+                      24h {priceChange >= 0 ? "↑" : "↓"} {Math.abs(priceChange || 0).toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
