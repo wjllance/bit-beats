@@ -18,33 +18,6 @@ const formatMarketCap = (marketCap: number): string => {
   }
 };
 
-// Fallback commodity data
-const FALLBACK_COMMODITIES = [
-  {
-    id: 'gold',
-    name: 'Gold',
-    symbol: 'XAU/USD',
-    current_price: 2619.50,
-    price_change_percentage_24h: 0.35,
-    market_cap: 17500000000000,
-    type: 'commodity' as const,
-  },
-  {
-    id: 'silver',
-    name: 'Silver',
-    symbol: 'XAG/USD',
-    current_price: 30.88,
-    price_change_percentage_24h: -0.42,
-    market_cap: 1730000000000,
-    type: 'commodity' as const,
-  },
-];
-
-// API Configuration
-const API_KEYS = {
-  FMP: process.env.NEXT_PUBLIC_FMP_API_KEY || 'demo',
-  METAL_PRICE: process.env.NEXT_PUBLIC_METAL_PRICE_API_KEY || 'demo',
-};
 
 const API_ENDPOINTS = {
   COINGECKO: 'https://api.coingecko.com/api/v3',
@@ -62,6 +35,15 @@ interface Asset {
   type: 'crypto' | 'stock' | 'commodity';
 }
 
+interface CoinGeckoResponse {
+  id: string;
+  name: string;
+  symbol: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
+}
+
 interface SortOption {
   label: string;
   value: keyof Asset | null;
@@ -72,7 +54,7 @@ interface TopAssetsProps {
   position: 'left' | 'right';
 }
 
-export default function TopAssets({ position }: TopAssetsProps) {
+export default function TopAssets({ position }: TopAssetsProps): JSX.Element {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState<SortOption>({
@@ -81,11 +63,6 @@ export default function TopAssets({ position }: TopAssetsProps) {
     direction: 'desc'
   });
 
-  const sortOptions: SortOption[] = [
-    { label: 'Market Cap', value: 'market_cap', direction: 'desc' },
-    { label: 'Price', value: 'current_price', direction: 'desc' },
-    { label: '24h Change', value: 'price_change_percentage_24h', direction: 'desc' },
-  ];
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -106,7 +83,7 @@ export default function TopAssets({ position }: TopAssetsProps) {
           }
         );
         
-        const cryptoAssets = cryptoResponse.data.map((coin: any) => ({
+        const cryptoAssets = cryptoResponse.data.map((coin: CoinGeckoResponse) => ({
           id: coin.id,
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
@@ -125,8 +102,8 @@ export default function TopAssets({ position }: TopAssetsProps) {
           .slice(0, 10); // Take only top 10 assets
 
         setAssets(allAssets);
-      } catch (err) {
-        console.error('Error fetching data:', err);
+      } catch (err: unknown) {
+        console.error('Error fetching data:', err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setIsLoading(false);
       }
@@ -142,9 +119,10 @@ export default function TopAssets({ position }: TopAssetsProps) {
     if (!sortConfig.value) return 0;
     const aValue = a[sortConfig.value];
     const bValue = b[sortConfig.value];
-    return sortConfig.direction === 'desc' ? 
-      (bValue as number) - (aValue as number) : 
-      (aValue as number) - (bValue as number);
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortConfig.direction === 'desc' ? bValue - aValue : aValue - bValue;
+    }
+    return 0;
   });
 
   // Get the appropriate slice of assets based on position
