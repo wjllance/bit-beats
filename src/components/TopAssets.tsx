@@ -271,30 +271,41 @@ export default function TopAssets({ position }: TopAssetsProps) {
           return (
             <div
               key={rank}
-              className="flex items-center justify-between p-3 bg-gray-800/70 rounded-lg hover:bg-gray-700/60 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-lg"
+              className="group flex items-center justify-between p-3 bg-gray-800/70 rounded-lg 
+                hover:bg-gray-700/80 transition-all duration-300 cursor-pointer 
+                hover:shadow-[0_0_15px_rgba(234,179,8,0.1)] hover:shadow-yellow-600/5
+                border border-transparent hover:border-yellow-900/30
+                transform hover:scale-[1.23] hover:-translate-y-0.5 hover:z-10"
             >
               <div className="flex items-center space-x-3">
-                <span className="text-gray-400 text-sm w-6 transition-colors duration-300 group-hover:text-gray-300">{rank}</span>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-yellow-500/20 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
+                  <span className="relative text-gray-400 text-sm w-6 transition-colors duration-300 group-hover:text-yellow-500">{rank}</span>
+                </div>
                 <div className="flex flex-col">
-                  <span className="text-white font-medium hover:text-yellow-500 transition-colors duration-300">{asset.symbol}</span>
-                  <span className="text-gray-400 text-xs transition-all duration-300 hover:text-gray-300">
+                  <span className="text-white font-medium transition-all duration-300 group-hover:text-yellow-500 group-hover:translate-x-1">{asset.symbol}</span>
+                  <span className="text-gray-400 text-xs transition-all duration-300 group-hover:text-gray-300 group-hover:translate-x-1">
                     {formatMarketCap(asset.market_cap)}
                   </span>
                 </div>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="text-right">
-                  <div className="text-white font-medium transition-all duration-300 hover:text-yellow-500">${asset.current_price.toLocaleString('en-US', {
+                  <div className="text-white font-medium transition-all duration-300 group-hover:text-yellow-500">${asset.current_price.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}</div>
                   <div 
-                    className={`text-xs transform transition-all duration-300 hover:translate-y-[-1px] ${
-                      asset.price_change_percentage_24h >= 0 ? 'text-green-400 hover:text-green-300' : 'text-red-400 hover:text-red-300'
+                    className={`text-xs transform transition-all duration-300 group-hover:translate-y-[-1px] flex items-center justify-end space-x-1 ${
+                      asset.price_change_percentage_24h >= 0 
+                        ? 'text-green-400 group-hover:text-green-300' 
+                        : 'text-red-400 group-hover:text-red-300'
                     }`}
                   >
-                    {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
-                    {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
+                    <span className="transition-transform duration-300 group-hover:scale-125">
+                      {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
+                    </span>
+                    <span>{Math.abs(asset.price_change_percentage_24h).toFixed(2)}%</span>
                   </div>
                 </div>
               </div>
