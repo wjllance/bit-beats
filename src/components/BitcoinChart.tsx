@@ -8,6 +8,8 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartOptions,
+  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { PriceData, TimeframeOption } from '../types';
@@ -35,7 +37,7 @@ export default function BitcoinChart({
   selectedTimeframe,
   isLoading,
 }: BitcoinChartProps) {
-  const options = {
+  const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -55,10 +57,10 @@ export default function BitcoinChart({
         padding: 12,
         displayColors: false,
         callbacks: {
-          title: (tooltipItems: any) => {
+          title: (tooltipItems: TooltipItem<'line'>[]) => {
             return tooltipItems[0].label;
           },
-          label: (context: any) => {
+          label: (context: TooltipItem<'line'>) => {
             return `$${context.parsed.y.toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -86,7 +88,7 @@ export default function BitcoinChart({
         },
         ticks: {
           color: '#9CA3AF',
-          callback: (value: any) => {
+          callback: (value: number) => {
             return '$' + value.toLocaleString('en-US', {
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
