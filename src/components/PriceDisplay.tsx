@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 
 interface PriceDisplayProps {
   currentPrice: number | null;
+  priceData: {
+    labels: string[];
+    prices: number[];
+  };
 }
 
 const SLOGANS = [
@@ -17,7 +21,7 @@ const SLOGANS = [
   "The Beat of Digital Currency"
 ];
 
-export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
+export default function PriceDisplay({ currentPrice, priceData }: PriceDisplayProps) {
   const [currentSlogan, setCurrentSlogan] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -42,8 +46,15 @@ export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
     }).format(price);
   };
 
-  const priceChange = currentPrice ? (currentPrice - (currentPrice * 0.98)) : null;
-  const isPositive = priceChange && priceChange > 0;
+  const calculatePriceChange = () => {
+    if (!currentPrice || !priceData.prices.length) return null;
+    const startPrice = priceData.prices[0];
+    const change = ((currentPrice - startPrice) / startPrice) * 100;
+    return change;
+  };
+
+  const priceChange = calculatePriceChange();
+  const isPositive = priceChange !== null && priceChange > 0;
 
   return (
     <div className="flex items-center justify-between bg-gray-800/50 rounded-lg px-8 py-6">
