@@ -9,6 +9,8 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartOptions,
+  TooltipItem,
 } from 'chart.js';
 import { TimeframeOption } from '../../types';
 import { usePriceHistory } from '../../hooks/usePriceHistory';
@@ -29,10 +31,10 @@ interface MobileBitcoinChartProps {
   selectedTimeframe: TimeframeOption;
 }
 
-export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinChartProps) {
+export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinChartProps): JSX.Element {
   const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
 
-  const options = {
+  const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -59,8 +61,8 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
           size: 12,
         },
         callbacks: {
-          title: (tooltipItems: any) => tooltipItems[0].label,
-          label: (context: any) =>
+          title: (tooltipItems: TooltipItem<'line'>[]) => tooltipItems[0].label,
+          label: (context: TooltipItem<'line'>) =>
             `$${context.parsed.y.toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
