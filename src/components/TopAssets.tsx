@@ -10,31 +10,6 @@ const GOLD_SUPPLY_TONS = 205000; // Total above-ground gold in metric tons
 const SILVER_SUPPLY_TONS = 1740000; // Total above-ground silver in metric tons
 const METRIC_TON_TO_OUNCES = 35274; // 1 metric ton = 35,274 ounces
 
-// Asset icons
-const ASSET_ICONS = {
-  STOCK: {
-    AAPL: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg',
-    MSFT: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg',
-    GOOGL: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
-    AMZN: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
-    NVDA: 'https://upload.wikimedia.org/wikipedia/sco/2/21/Nvidia_logo.svg',
-    TSLA: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg',
-    TSM: 'https://upload.wikimedia.org/wikipedia/commons/7/77/TSMC_Logo.svg',
-    META: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg',
-    'BRK.B': 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Berkshire_Hathaway_logo.svg',
-    JPM: 'https://upload.wikimedia.org/wikipedia/commons/a/af/J_P_Morgan_Logo_2008_1.svg',
-    UNH: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/UnitedHealth_Group_logo.svg',
-    '2222.SR': 'https://www.aramco.com/images/aramcoLogo.svg',
-    DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/8/83/Circle-icons-dolly.svg'
-  },
-  COMMODITY: {
-    GOLD: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Gold_coin_icon.svg',
-    SILVER: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Silver_coin_icon.svg',
-    DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Commodity_icon.svg'
-  },
-  DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg'
-};
-
 // Fallback commodity data
 const FALLBACK_COMMODITIES = [
   {
@@ -76,7 +51,6 @@ interface Asset {
   current_price: number;
   price_change_percentage_24h: number;
   market_cap: number;
-  image?: string;
   type: 'crypto' | 'stock' | 'commodity';
 }
 
@@ -126,7 +100,6 @@ export default function TopAssets({ position }: TopAssetsProps) {
         current_price: coin.current_price,
         price_change_percentage_24h: coin.price_change_percentage_24h,
         market_cap: coin.market_cap,
-        image: coin.image,
         type: 'crypto' as const,
       }));
     } catch (error) {
@@ -277,22 +250,12 @@ export default function TopAssets({ position }: TopAssetsProps) {
   const startRank = position === 'left' ? 1 : 6;
   const title = position === 'left' ? 'Top 5 Assets' : 'Next 5 Assets';
 
-  const getAssetIcon = (asset: Asset) => {
-    if (asset.type === 'stock') {
-      return ASSET_ICONS.STOCK[asset.symbol as keyof typeof ASSET_ICONS.STOCK] || ASSET_ICONS.STOCK.DEFAULT;
-    } else if (asset.type === 'commodity') {
-      return ASSET_ICONS.COMMODITY[asset.symbol as keyof typeof ASSET_ICONS.COMMODITY] || ASSET_ICONS.COMMODITY.DEFAULT;
-    }
-    return asset.image || ASSET_ICONS.DEFAULT;
-  };
-
   return (
     <div className="w-full">
       <h2 className="text-lg font-semibold text-yellow-500/90 mb-4">{title}</h2>
       <div className="space-y-4">
         {displayedAssets.map((asset, index) => {
           const rank = startRank + index;
-          const isBitcoin = asset.symbol.toLowerCase() === 'btc';
           return (
             <div
               key={rank}
@@ -300,12 +263,7 @@ export default function TopAssets({ position }: TopAssetsProps) {
             >
               <div className="flex items-center space-x-3">
                 <span className="text-gray-400 text-sm w-6">{rank}</span>
-                <img 
-                  src={getAssetIcon(asset)} 
-                  alt={asset.name} 
-                  className="w-6 h-6 mr-3 flex-shrink-0"
-                />
-                <span className="text-white">{asset.name}</span>
+                <span className="text-white font-medium">{asset.symbol}</span>
               </div>
               <div className="text-right">
                 <div className="text-white">${asset.current_price.toLocaleString('en-US', {
