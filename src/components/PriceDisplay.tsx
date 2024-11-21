@@ -19,10 +19,15 @@ const SLOGANS = [
 
 export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
   const [currentSlogan, setCurrentSlogan] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlogan((prev) => (prev + 1) % SLOGANS.length);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentSlogan((prev) => (prev + 1) % SLOGANS.length);
+        setIsTransitioning(false);
+      }, 500); // Half of the transition duration
     }, 5000); // Change slogan every 5 seconds
 
     return () => clearInterval(interval);
@@ -79,8 +84,14 @@ export default function PriceDisplay({ currentPrice }: PriceDisplayProps) {
       </div>
 
       {/* Right: Rotating Slogan */}
-      <div className="w-[300px] flex items-center justify-end">
-        <p className="text-yellow-500 text-base transition-all duration-500 text-right">
+      <div className="w-[300px] flex items-center justify-end overflow-hidden">
+        <p 
+          className={`
+            text-yellow-500 text-base text-right
+            transition-all duration-1000 ease-in-out
+            transform ${isTransitioning ? 'translate-y-8 opacity-0' : 'translate-y-0 opacity-100'}
+          `}
+        >
           {SLOGANS[currentSlogan]}
         </p>
       </div>
