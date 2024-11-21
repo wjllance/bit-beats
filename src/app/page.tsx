@@ -7,6 +7,7 @@ import { formatDate } from '../utils/dateFormatter';
 import TimeframeSelector from '../components/TimeframeSelector';
 import PriceDisplay from '../components/PriceDisplay';
 import BitcoinChart from '../components/BitcoinChart';
+import TopAssets from '../components/TopAssets';
 
 export default function BitcoinPriceTracker() {
   const [priceData, setPriceData] = useState<PriceData>({
@@ -73,9 +74,15 @@ export default function BitcoinPriceTracker() {
 
         {/* Main Content */}
         <div className="space-y-8">
-          <section className="price-display animate-fade-in">
-            <PriceDisplay currentPrice={currentPrice} />
-          </section>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section className="price-display animate-fade-in">
+              <PriceDisplay currentPrice={currentPrice} />
+            </section>
+            
+            <section className="animate-fade-in">
+              <TopAssets />
+            </section>
+          </div>
           
           <section className="flex justify-center animate-fade-in">
             <TimeframeSelector
