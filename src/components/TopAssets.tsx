@@ -10,6 +10,18 @@ const GOLD_SUPPLY_TONS = 205000; // Total above-ground gold in metric tons
 const SILVER_SUPPLY_TONS = 1740000; // Total above-ground silver in metric tons
 const METRIC_TON_TO_OUNCES = 35274; // 1 metric ton = 35,274 ounces
 
+const formatMarketCap = (marketCap: number): string => {
+  if (marketCap >= 1e12) {
+    return `$${(marketCap / 1e12).toFixed(1)}T`;
+  } else if (marketCap >= 1e9) {
+    return `$${(marketCap / 1e9).toFixed(1)}B`;
+  } else if (marketCap >= 1e6) {
+    return `$${(marketCap / 1e6).toFixed(1)}M`;
+  } else {
+    return `$${marketCap.toLocaleString()}`;
+  }
+};
+
 // Fallback commodity data
 const FALLBACK_COMMODITIES = [
   {
@@ -263,18 +275,23 @@ export default function TopAssets({ position }: TopAssetsProps) {
             >
               <div className="flex items-center space-x-3">
                 <span className="text-gray-400 text-sm w-6">{rank}</span>
-                <span className="text-white font-medium">{asset.symbol}</span>
+                <div className="flex flex-col">
+                  <span className="text-white font-medium">{asset.symbol}</span>
+                  <span className="text-gray-400 text-xs">
+                    {formatMarketCap(asset.market_cap)}
+                  </span>
+                </div>
               </div>
               <div className="text-right">
-                <div className="text-white">${asset.current_price.toLocaleString('en-US', {
+                <div className="text-white font-medium">${asset.current_price.toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}</div>
                 <div className={`text-xs ${
                   asset.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
                 }`}>
-                  {asset.price_change_percentage_24h >= 0 ? '+' : ''}
-                  {asset.price_change_percentage_24h.toFixed(2)}%
+                  {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
+                  {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
                 </div>
               </div>
             </div>
