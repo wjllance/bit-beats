@@ -1,40 +1,35 @@
-import { TimeframeOption, timeframeOptions } from '../types';
+import { TimeframeOption } from '../types';
 
 interface TimeframeSelectorProps {
   selectedTimeframe: TimeframeOption;
   onTimeframeChange: (timeframe: TimeframeOption) => void;
 }
 
+const timeframeOptions: TimeframeOption[] = [
+  { label: '24h', days: 1 },
+  { label: '7d', days: 7 },
+  { label: '30d', days: 30 },
+  { label: '90d', days: 90 },
+  { label: '1y', days: 365 },
+];
+
 export default function TimeframeSelector({
   selectedTimeframe,
   onTimeframeChange,
 }: TimeframeSelectorProps) {
   return (
-    <div className="flex justify-center gap-2 mb-8 animate-fade-in">
-      <div className="timeframe-group inline-flex" role="group">
-        {timeframeOptions.map((option, index) => (
-          <button
-            key={option.value}
-            onClick={() => onTimeframeChange(option)}
-            className={`
-              relative
-              ${index === 0 ? 'rounded-l-lg' : ''}
-              ${index === timeframeOptions.length - 1 ? 'rounded-r-lg' : ''}
-              ${
-                selectedTimeframe.value === option.value
-                  ? 'btn-timeframe-active'
-                  : 'btn-timeframe'
-              }
-              ${index > 0 ? '-ml-px' : ''}
-            `}
-          >
-            {option.label}
-            {selectedTimeframe.value === option.value && (
-              <span className="absolute inset-0 rounded-lg ring-1 ring-white/50" />
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="timeframe-container">
+      {timeframeOptions.map((timeframe) => (
+        <button
+          key={timeframe.label}
+          onClick={() => onTimeframeChange(timeframe)}
+          className={`timeframe-button ${
+            timeframe.label === selectedTimeframe.label ? 'active' : ''
+          }`}
+        >
+          {timeframe.label}
+        </button>
+      ))}
     </div>
   );
 }

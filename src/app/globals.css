@@ -3,153 +3,126 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 240, 253, 244;
-  --background-end-rgb: 248, 250, 252;
+  --bitcoin-orange: 247, 147, 26;
+  --navy-dark: 13, 24, 41;
+  --navy-light: 23, 36, 64;
+  --accent-blue: 99, 179, 237;
 }
 
-@layer base {
-  body {
-    @apply text-secondary-900 bg-gradient-to-br from-primary-50 to-secondary-50;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+body {
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--navy-dark)),
+    rgb(var(--navy-light))
+  );
+  min-height: 100vh;
 }
 
 @layer components {
-  .glassmorphism {
-    @apply backdrop-blur-md bg-white/30 border border-white/20 shadow-lg;
+  .crypto-container {
+    @apply relative overflow-hidden rounded-xl
+           border border-white/10 bg-white/5
+           backdrop-blur-sm;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.02)
+    );
   }
 
-  .card {
-    @apply glassmorphism rounded-2xl p-6 transition-all duration-300;
+  /* Header Styles */
+  .crypto-header {
+    @apply text-center py-8 mb-12 relative;
   }
 
-  .card-hover {
-    @apply hover:shadow-2xl hover:bg-white/40 hover:scale-[1.02];
+  .crypto-title {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+    background: linear-gradient(135deg, #f7931a, #fbb034);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(247, 147, 26, 0.3);
   }
 
-  .btn {
-    @apply px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  .crypto-subtitle {
+    @apply text-lg md:text-xl text-gray-400 font-light mt-3;
   }
 
-  .btn-primary {
-    @apply bg-primary-500 text-white hover:bg-primary-600 
-           active:bg-primary-700;
+  /* Price Display */
+  .price-display {
+    @apply p-6 crypto-container;
   }
 
-  .btn-secondary {
-    @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 
-           active:bg-secondary-300;
+  .price-value {
+    @apply text-3xl md:text-4xl font-bold text-white;
+    text-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
   }
 
-  .btn-outline {
-    @apply border border-secondary-200 bg-white/50 text-secondary-700 
-           hover:bg-secondary-50 active:bg-secondary-100;
+  .price-label {
+    @apply text-gray-400 text-sm uppercase tracking-wider;
   }
 
-  /* Timeframe selector specific styles */
-  .btn-timeframe {
-    @apply px-4 py-2 text-sm font-medium transition-all duration-200
-           text-secondary-600 hover:text-secondary-900
-           bg-white/20 hover:bg-white/40
-           focus:outline-none focus:z-10;
+  /* Chart Section */
+  .chart-container {
+    @apply p-6 crypto-container mt-8;
   }
 
-  .btn-timeframe-active {
-    @apply px-4 py-2 text-sm font-medium
-           bg-primary-500 text-white
-           shadow-md hover:bg-primary-600
-           focus:outline-none focus:z-10;
+  /* Timeframe Controls */
+  .timeframe-container {
+    @apply p-2 crypto-container inline-flex rounded-lg
+           bg-white/5 backdrop-blur-md;
   }
 
-  .timeframe-group {
-    @apply p-1 bg-white/20 rounded-xl shadow-inner
-           backdrop-blur-lg border border-white/20;
+  .timeframe-button {
+    @apply px-4 py-2 rounded-lg text-sm font-medium
+           transition-all duration-200 ease-in-out;
   }
 
-  /* Fancy header styles */
-  .fancy-header {
-    @apply relative text-center py-16 px-4;
+  .timeframe-button:not(.active) {
+    @apply text-gray-400 hover:text-white hover:bg-white/10;
   }
 
-  .fancy-header::before,
-  .fancy-header::after {
-    content: '';
-    @apply absolute left-1/2 w-32 h-0.5 
-           bg-gradient-to-r from-transparent via-primary-500/50 to-transparent
-           transform -translate-x-1/2;
+  .timeframe-button.active {
+    @apply bg-[#f7931a] text-white shadow-lg;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
-  .fancy-header::before {
-    @apply -top-2;
-  }
-
-  .fancy-header::after {
-    @apply -bottom-2;
-  }
-
-  .fancy-title {
-    @apply text-5xl font-bold mb-6
-           bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600
-           bg-clip-text text-transparent
-           drop-shadow-sm
-           relative z-10;
-  }
-
-  .fancy-subtitle {
-    @apply text-lg text-secondary-600
-           relative inline-block
-           after:content-[''] after:absolute after:-bottom-1 
-           after:left-0 after:w-full after:h-px
-           after:bg-gradient-to-r after:from-transparent after:via-secondary-400/50 after:to-transparent;
-  }
-
-  .bitcoin-icon {
-    @apply absolute -top-4 left-1/2 -translate-x-1/2
-           w-16 h-16 text-primary-500/90
-           filter drop-shadow-lg
-           z-20;
-    animation: float 3s ease-in-out infinite;
+  /* Grid Pattern */
+  .crypto-grid {
+    @apply absolute inset-0 z-0;
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, transparent, black, transparent);
   }
 }
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
-  }
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
 
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  @keyframes float {
-    0%, 100% {
-      transform: translate(-50%, 0);
-    }
-    50% {
-      transform: translate(-50%, -10px);
-    }
+@keyframes glow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
   }
 }
