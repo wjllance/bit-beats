@@ -1,12 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Orbitron } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const orbitron = Orbitron({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Bitcoin Price Tracker',
-  description: 'Real-time Bitcoin price tracking with historical data visualization',
+  title: 'BTC Beats - Bitcoin Price Tracker',
+  description: 'Watch Bitcoin beat other assets in real-time with market tracking and visualization',
 }
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={orbitron.className}>{children}</body>
     </html>
   )
 }
