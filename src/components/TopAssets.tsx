@@ -86,11 +86,14 @@ interface SortOption {
   direction: 'asc' | 'desc';
 }
 
-export default function TopAssets() {
+interface TopAssetsProps {
+  position: 'left' | 'right';
+}
+
+export default function TopAssets({ position }: TopAssetsProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>({
+  const [sortConfig, setSortConfig] = useState<SortOption>({
     label: 'Market Cap',
     value: 'market_cap',
     direction: 'desc'
@@ -102,134 +105,134 @@ export default function TopAssets() {
     { label: '24h Change', value: 'price_change_percentage_24h', direction: 'desc' },
   ];
 
-  useEffect(() => {
-    const fetchCryptoData = async () => {
-      try {
-        const response = await axios.get(
-          `${API_ENDPOINTS.COINGECKO}/coins/markets`,
-          {
-            params: {
-              vs_currency: 'usd',
-              order: 'market_cap_desc',
-              per_page: 5,
-              page: 1,
-              sparkline: false,
-            },
-          }
-        );
-        return response.data.map((coin: any) => ({
-          id: coin.id,
-          name: coin.name,
-          symbol: coin.symbol.toUpperCase(),
-          current_price: coin.current_price,
-          price_change_percentage_24h: coin.price_change_percentage_24h,
-          market_cap: coin.market_cap,
-          image: coin.image,
-          type: 'crypto' as const,
-        }));
-      } catch (error) {
-        console.error('Error fetching crypto data:', error);
-        return [];
-      }
-    };
-
-    const fetchStockData = async () => {
-      try {
-        const response = await axios.get(`${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`, {
-          params: { apikey: API_KEYS.FMP }
-        });
-        return response.data.map((stock: any) => ({
-          id: stock.symbol,
-          name: stock.name,
-          symbol: stock.symbol,
-          current_price: stock.price,
-          price_change_percentage_24h: stock.changesPercentage,
-          market_cap: stock.marketCap,
-          type: 'stock' as const,
-        }));
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-        return [];
-      }
-    };
-
-    const fetchCommodityData = async () => {
-      try {
-        // Get yesterday's date for price change
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 2);
-
-        const formatDate = (date: Date) => {
-          return date.toISOString().split('T')[0];
-        };
-
-        const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
-          const marketCap = pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
-          return marketCap;
-        };
-
-        const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
-          const change = ((currentPrice - previousPrice) / previousPrice) * 100;
-          return change;
-        };
-
-        const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
-          axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-            params: {
-              api_key: API_KEYS.METAL_PRICE,
-              currencies: 'XAU'
-            }
-          }),
-          axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-            params: {
-              api_key: API_KEYS.METAL_PRICE,
-              currencies: 'XAG'
-            }
-          }),
-          axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-            params: {
-              api_key: API_KEYS.METAL_PRICE,
-              currencies: 'XAU',
-            }
-          }),
-          axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-            params: {
-              api_key: API_KEYS.METAL_PRICE,
-              currencies: 'XAG',
-            }
-          })
-        ]);
-
-        const commodityData = [
-          {
-            id: 'gold',
-            name: 'Gold',
-            symbol: 'XAU/USD',
-            current_price: goldPrice.data.rates.USDXAU,
-            market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
-            price_change_percentage_24h: calculatePriceChange(goldPrice.data.rates.USDXAU, yesterdayGold.data.rates.USDXAU),
-            type: 'commodity' as const,
+  const fetchCryptoData = async () => {
+    try {
+      const response = await axios.get(
+        `${API_ENDPOINTS.COINGECKO}/coins/markets`,
+        {
+          params: {
+            vs_currency: 'usd',
+            order: 'market_cap_desc',
+            per_page: 5,
+            page: 1,
+            sparkline: false,
           },
-          {
-            id: 'silver',
-            name: 'Silver',
-            symbol: 'XAG/USD',
-            current_price: silverPrice.data.rates.USDXAG,
-            market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
-            price_change_percentage_24h: calculatePriceChange(silverPrice.data.rates.USDXAG, yesterdaySilver.data.rates.USDXAG),
-            type: 'commodity' as const,
+        }
+      );
+      return response.data.map((coin: any) => ({
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        current_price: coin.current_price,
+        price_change_percentage_24h: coin.price_change_percentage_24h,
+        market_cap: coin.market_cap,
+        image: coin.image,
+        type: 'crypto' as const,
+      }));
+    } catch (error) {
+      console.error('Error fetching crypto data:', error);
+      return [];
+    }
+  };
+
+  const fetchStockData = async () => {
+    try {
+      const response = await axios.get(`${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`, {
+        params: { apikey: API_KEYS.FMP }
+      });
+      return response.data.map((stock: any) => ({
+        id: stock.symbol,
+        name: stock.name,
+        symbol: stock.symbol,
+        current_price: stock.price,
+        price_change_percentage_24h: stock.changesPercentage,
+        market_cap: stock.marketCap,
+        type: 'stock' as const,
+      }));
+    } catch (error) {
+      console.error('Error fetching stock data:', error);
+      return [];
+    }
+  };
+
+  const fetchCommodityData = async () => {
+    try {
+      // Get yesterday's date for price change
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 2);
+
+      const formatDate = (date: Date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
+        const marketCap = pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
+        return marketCap;
+      };
+
+      const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
+        const change = ((currentPrice - previousPrice) / previousPrice) * 100;
+        return change;
+      };
+
+      const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
+        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+          params: {
+            api_key: API_KEYS.METAL_PRICE,
+            currencies: 'XAU'
           }
-        ];
+        }),
+        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+          params: {
+            api_key: API_KEYS.METAL_PRICE,
+            currencies: 'XAG'
+          }
+        }),
+        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+          params: {
+            api_key: API_KEYS.METAL_PRICE,
+            currencies: 'XAU',
+          }
+        }),
+        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+          params: {
+            api_key: API_KEYS.METAL_PRICE,
+            currencies: 'XAG',
+          }
+        })
+      ]);
 
-        return commodityData;
-      } catch (error) {
-        console.error('Error fetching commodity data:', error);
-        console.log('Using fallback commodity data');
-        return FALLBACK_COMMODITIES;
-      }
-    };
+      const commodityData = [
+        {
+          id: 'gold',
+          name: 'Gold',
+          symbol: 'XAU/USD',
+          current_price: goldPrice.data.rates.USDXAU,
+          market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
+          price_change_percentage_24h: calculatePriceChange(goldPrice.data.rates.USDXAU, yesterdayGold.data.rates.USDXAU),
+          type: 'commodity' as const,
+        },
+        {
+          id: 'silver',
+          name: 'Silver',
+          symbol: 'XAG/USD',
+          current_price: silverPrice.data.rates.USDXAG,
+          market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
+          price_change_percentage_24h: calculatePriceChange(silverPrice.data.rates.USDXAG, yesterdaySilver.data.rates.USDXAG),
+          type: 'commodity' as const,
+        }
+      ];
 
+      return commodityData;
+    } catch (error) {
+      console.error('Error fetching commodity data:', error);
+      console.log('Using fallback commodity data');
+      return FALLBACK_COMMODITIES;
+    }
+  };
+
+  useEffect(() => {
     const fetchAllData = async () => {
       try {
         setIsLoading(true);
@@ -243,12 +246,8 @@ export default function TopAssets() {
           .sort((a, b) => b.market_cap - a.market_cap)
           .slice(0, 10); // Take only top 10 assets
 
-        console.log("allAssets", allAssets)
-
         setAssets(allAssets);
-        setError(null);
       } catch (err) {
-        setError('Failed to fetch market data');
         console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
@@ -261,162 +260,96 @@ export default function TopAssets() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(price);
-  };
+  const sortedAssets = [...assets].sort((a, b) => {
+    if (!sortConfig.value) return 0;
+    const aValue = a[sortConfig.value];
+    const bValue = b[sortConfig.value];
+    return sortConfig.direction === 'desc' ? 
+      (bValue as number) - (aValue as number) : 
+      (aValue as number) - (bValue as number);
+  });
 
-  const formatMarketCap = (marketCap: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      maximumFractionDigits: 3,
-    }).format(marketCap);
-  };
+  // Get the appropriate slice of assets based on position
+  const displayedAssets = position === 'left' ? 
+    sortedAssets.slice(0, 5) : 
+    sortedAssets.slice(5, 10);
 
   const getAssetIcon = (asset: Asset) => {
-    if (asset.image) return asset.image;
-    
-    // Default icons for different asset types
-    switch (asset.type) {
-      case 'stock':
-        return ASSET_ICONS.STOCK[asset.symbol] || ASSET_ICONS.STOCK.DEFAULT;
-      case 'commodity':
-        return asset.symbol === 'XAU/USD' 
-          ? ASSET_ICONS.COMMODITY.GOLD 
-          : ASSET_ICONS.COMMODITY.SILVER;
-      default:
-        return ASSET_ICONS.DEFAULT;
+    if (asset.type === 'stock') {
+      return ASSET_ICONS.STOCK[asset.symbol as keyof typeof ASSET_ICONS.STOCK] || ASSET_ICONS.STOCK.DEFAULT;
+    } else if (asset.type === 'commodity') {
+      return ASSET_ICONS.COMMODITY[asset.symbol as keyof typeof ASSET_ICONS.COMMODITY] || ASSET_ICONS.COMMODITY.DEFAULT;
     }
+    return asset.image || ASSET_ICONS.DEFAULT;
   };
-
-  const sortAssets = (assets: Asset[]) => {
-    if (!sortOption.value) return assets;
-    
-    return [...assets].sort((a, b) => {
-      const valueA = a[sortOption.value!];
-      const valueB = b[sortOption.value!];
-      return sortOption.direction === 'desc' ? valueB - valueA : valueA - valueB;
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="crypto-container p-6 animate-fade-in">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="mb-4">
-            <div className="h-20 bg-white/5 rounded-lg animate-pulse">
-              <div className="flex items-center h-full px-4">
-                <div className="w-10 h-10 bg-white/10 rounded-full"></div>
-                <div className="ml-3 flex-grow">
-                  <div className="h-4 w-24 bg-white/10 rounded"></div>
-                  <div className="h-3 w-16 bg-white/10 rounded mt-2"></div>
-                </div>
-                <div className="text-right">
-                  <div className="h-4 w-20 bg-white/10 rounded"></div>
-                  <div className="h-3 w-16 bg-white/10 rounded mt-2"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="crypto-container p-6 animate-fade-in">
-        <div className="text-red-400 text-center mb-4">{error}</div>
-        <button
-          onClick={() => fetchAllData()}
-          className="mx-auto block px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors duration-200 text-gray-200"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
-    <div className="crypto-container p-6 animate-fade-in">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-200">
-          Top 10 Market Assets
+    <div className="w-full h-full flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <h2 className="text-lg font-semibold text-yellow-500">
+          {position === 'left' ? 'Top 1-5' : 'Top 6-10'}
         </h2>
-        <select
-          value={JSON.stringify(sortOption)}
-          onChange={(e) => setSortOption(JSON.parse(e.target.value))}
-          className="bg-white/5 text-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {sortOptions.map((option) => (
-            <option key={option.label} value={JSON.stringify(option)}>
-              Sort by {option.label}
-            </option>
-          ))}
-        </select>
+        {isLoading && (
+          <span className="text-sm text-gray-400 animate-pulse">Updating...</span>
+        )}
       </div>
-      <div className="space-y-4">
-        {sortAssets(assets).map((asset, index) => (
-          <div
-            key={asset.id}
-            className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 group"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="absolute -top-3 -left-3 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-sm text-gray-400">
-                  {index + 1}
-                </div>
-                <img
-                  src={getAssetIcon(asset)}
-                  alt={asset.name}
-                  className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform duration-200"
-                />
-                <div className="absolute -top-1 -right-1">
-                  <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full ${
-                    asset.type === 'crypto' ? 'bg-yellow-500' :
-                    asset.type === 'stock' ? 'bg-blue-500' :
-                    'bg-green-500'
-                  }`}>
-                  </span>
-                </div>
-              </div>
-              <div>
-                <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
-                  {asset.name}
-                </div>
-                <div className="text-sm text-gray-400">
-                  <span className="uppercase">{asset.symbol}</span>
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-white/5 text-xs">
-                    {asset.type}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="text-right space-y-1">
-              <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
-                {formatPrice(asset.current_price)}
-              </div>
+
+      <div className="flex-1 overflow-hidden">
+        <div className="overflow-y-auto h-full">
+          {displayedAssets.map((asset, index) => {
+            const isBitcoin = asset.symbol.toLowerCase() === 'btc';
+            const actualRank = position === 'left' ? index + 1 : index + 6;
+            
+            return (
               <div
-                className={`text-sm ${
-                  asset.price_change_percentage_24h >= 0
-                    ? 'text-green-400'
-                    : 'text-red-400'
-                }`}
+                key={asset.id}
+                className={`border-b border-gray-700 last:border-b-0 ${
+                  isBitcoin ? 'bg-yellow-500 bg-opacity-5' : ''
+                } hover:bg-gray-700 transition-colors duration-200`}
               >
-                {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'} {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
+                <div className="p-4 flex items-center space-x-4">
+                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full 
+                    ${isBitcoin ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
+                    {actualRank}
+                  </span>
+                  
+                  <div className="flex items-center flex-1 min-w-0">
+                    <img 
+                      src={getAssetIcon(asset)} 
+                      alt={asset.name} 
+                      className="w-6 h-6 mr-3 flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className={`text-sm font-medium truncate ${
+                        isBitcoin ? 'text-yellow-500' : 'text-white'
+                      }`}>
+                        {asset.name}
+                      </div>
+                      <div className="text-xs text-gray-400 truncate">
+                        {asset.symbol.toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-sm text-white">
+                      ${asset.current_price.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </div>
+                    <div className={`text-xs ${
+                      asset.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {asset.price_change_percentage_24h >= 0 ? '+' : ''}
+                      {asset.price_change_percentage_24h.toFixed(2)}%
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-xs text-gray-400">
-                MCap: {formatMarketCap(asset.market_cap)}
-              </div>
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

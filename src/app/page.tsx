@@ -52,7 +52,7 @@ export default function BitcoinPriceTracker() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6 sm:p-8 md:p-12" id="btc-beats-app">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
@@ -78,32 +78,38 @@ export default function BitcoinPriceTracker() {
 
         {/* Main Content */}
         <div className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <section className="bg-gray-800 rounded-xl p-6 shadow-lg transform hover:scale-105 transition-transform duration-300">
-              <PriceDisplay currentPrice={currentPrice} />
-            </section>
-            
-            <section className="bg-gray-800 rounded-xl p-6 shadow-lg transform hover:scale-105 transition-transform duration-300">
-              <TopAssets />
-            </section>
-          </div>
-          
-          <section className="flex justify-center">
-            <div className="bg-gray-800 rounded-xl p-4 shadow-lg">
-              <TimeframeSelector
-                selectedTimeframe={selectedTimeframe}
-                onTimeframeChange={setSelectedTimeframe}
-              />
-            </div>
+          {/* Price Display Section */}
+          <section className="bg-gray-800 rounded-xl p-6 shadow-lg">
+            <PriceDisplay currentPrice={currentPrice} />
           </section>
 
-          <section className="bg-gray-800 rounded-xl p-6 shadow-lg">
-            <BitcoinChart
-              priceData={priceData}
-              selectedTimeframe={selectedTimeframe}
-              isLoading={isLoading}
-            />
-          </section>
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            {/* Left Assets List */}
+            <section className="xl:col-span-3 bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+              <TopAssets position="left" />
+            </section>
+
+            {/* Center Chart */}
+            <section className="xl:col-span-6 bg-gray-800 rounded-xl p-6 shadow-lg">
+              <div className="mb-4">
+                <TimeframeSelector
+                  selectedTimeframe={selectedTimeframe}
+                  onTimeframeChange={setSelectedTimeframe}
+                />
+              </div>
+              <BitcoinChart
+                priceData={priceData}
+                selectedTimeframe={selectedTimeframe}
+                isLoading={isLoading}
+              />
+            </section>
+
+            {/* Right Assets List */}
+            <section className="xl:col-span-3 bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+              <TopAssets position="right" />
+            </section>
+          </div>
         </div>
 
         <footer className="text-center mt-12 text-yellow-500 text-sm">
