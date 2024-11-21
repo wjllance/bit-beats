@@ -15,7 +15,7 @@ export default function BitcoinPriceTracker() {
     prices: [],
   });
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({ label: '24h', value: '24h', days: 1 });
+  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({ label: '24h', days: 1 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

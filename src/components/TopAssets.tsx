@@ -2,13 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // Constants for market data
-const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'TSM', 'META', 'BRK.B', 'JPM', 'UNH', '2222.SR'];
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Constants for commodity calculations
-const GOLD_SUPPLY_TONS = 205000; // Total above-ground gold in metric tons
-const SILVER_SUPPLY_TONS = 1740000; // Total above-ground silver in metric tons
-const METRIC_TON_TO_OUNCES = 35274; // 1 metric ton = 35,274 ounces
 
 const formatMarketCap = (marketCap: number): string => {
   if (marketCap >= 1e12) {
