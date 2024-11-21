@@ -34,12 +34,13 @@ export default function MobilePage() {
   const [currentSlogan, setCurrentSlogan] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Calculate price change only when we have valid data
+  // Calculate 24h price change
   const currentPrice = priceData.prices[priceData.prices.length - 1];
-  const previousPrice = priceData.prices[priceData.prices.length - 2];
-  const priceChange = (!isLoading && currentPrice && previousPrice)
-    ? ((currentPrice - previousPrice) / previousPrice) * 100
-    : null;
+  const priceChange = (!isLoading && priceData.prices.length > 0) ? (() => {
+    // For 24h timeframe, compare first and last price
+    const startPrice = priceData.prices[0];
+    return ((currentPrice - startPrice) / startPrice) * 100;
+  })() : null;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,12 +96,20 @@ export default function MobilePage() {
             {error ? (
               <span className="text-sm text-red-400">{error}</span>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <div className="flex items-baseline space-x-2">
+                  <div className="flex flex-col">
                     <span className="text-2xl font-bold text-white">
                       ${formatPrice(currentPrice)}
                     </span>
+                    {priceChange !== null && (
+                      <span className={clsx(
+                        "text-sm font-medium mt-0.5",
+                        priceChange >= 0 ? "text-green-500" : "text-red-500"
+                      )}>
+                        {priceChange >= 0 ? "+" : ""}{priceChange.toFixed(2)}%
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center space-x-1">
                     <div className={clsx(
@@ -116,14 +125,16 @@ export default function MobilePage() {
                   <span className="text-xs text-gray-500">
                     Last updated: {new Date().toLocaleTimeString()}
                   </span>
-                  <div className="flex items-center space-x-1 text-xs">
-                    <span className={clsx(
-                      "px-2 py-0.5 rounded-full font-medium",
-                      priceChange >= 0 ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
-                    )}>
-                      24h {priceChange >= 0 ? "↑" : "↓"} {Math.abs(priceChange || 0).toFixed(2)}%
-                    </span>
-                  </div>
+                  {priceChange !== null && (
+                    <div className="flex items-center space-x-1 text-xs">
+                      <span className={clsx(
+                        "px-2 py-0.5 rounded-full font-medium",
+                        priceChange >= 0 ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                      )}>
+                        {priceChange >= 0 ? "Bullish ↑" : "Bearish ↓"}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
