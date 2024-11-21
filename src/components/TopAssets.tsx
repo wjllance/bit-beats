@@ -1,6 +1,62 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Constants for market data
+const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'TSM', 'META', 'BRK.B', 'JPM', 'UNH', '2222.SR'];
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+// Constants for commodity calculations
+const GOLD_SUPPLY_TONS = 205000; // Total above-ground gold in metric tons
+const SILVER_SUPPLY_TONS = 1740000; // Total above-ground silver in metric tons
+const METRIC_TON_TO_OUNCES = 35274; // 1 metric ton = 35,274 ounces
+
+// Asset icons
+const ASSET_ICONS = {
+  STOCK: {
+    AAPL: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg',
+    MSFT: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg',
+    GOOGL: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+    AMZN: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+    NVDA: 'https://upload.wikimedia.org/wikipedia/sco/2/21/Nvidia_logo.svg',
+    TSLA: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg',
+    TSM: 'https://upload.wikimedia.org/wikipedia/commons/7/77/TSMC_Logo.svg',
+    META: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg',
+    'BRK.B': 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Berkshire_Hathaway_logo.svg',
+    JPM: 'https://upload.wikimedia.org/wikipedia/commons/a/af/J_P_Morgan_Logo_2008_1.svg',
+    UNH: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/UnitedHealth_Group_logo.svg',
+    '2222.SR': 'https://www.aramco.com/images/aramcoLogo.svg',
+    DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/8/83/Circle-icons-dolly.svg'
+  },
+  COMMODITY: {
+    GOLD: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Gold_coin_icon.svg',
+    SILVER: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Silver_coin_icon.svg',
+    DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Commodity_icon.svg'
+  },
+  DEFAULT: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg'
+};
+
+// Fallback commodity data
+const FALLBACK_COMMODITIES = [
+  {
+    id: 'gold',
+    name: 'Gold',
+    symbol: 'XAU/USD',
+    current_price: 2619.50,
+    price_change_percentage_24h: 0.35,
+    market_cap: 17500000000000,
+    type: 'commodity' as const,
+  },
+  {
+    id: 'silver',
+    name: 'Silver',
+    symbol: 'XAG/USD',
+    current_price: 30.88,
+    price_change_percentage_24h: -0.42,
+    market_cap: 1730000000000,
+    type: 'commodity' as const,
+  },
+];
+
 // API Configuration
 const API_KEYS = {
   FMP: process.env.NEXT_PUBLIC_FMP_API_KEY || 'demo',
@@ -78,9 +134,8 @@ export default function TopAssets() {
     };
 
     const fetchStockData = async () => {
-      const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA'];
       try {
-        const response = await axios.get(`${API_ENDPOINTS.FMP}/quote/${popularStocks.join(',')}`, {
+        const response = await axios.get(`${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`, {
           params: { apikey: API_KEYS.FMP }
         });
         return response.data.map((stock: any) => ({
@@ -98,111 +153,82 @@ export default function TopAssets() {
       }
     };
 
+    const fetchCommodityData = async () => {
+      try {
+        // Get yesterday's date for price change
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 2);
 
-  // Fallback data for commodities when API fails
-  const FALLBACK_COMMODITIES = [
-    {
-      id: 'gold',
-      name: 'Gold',
-      symbol: 'XAU/USD',
-      current_price: 2024.50,
-      price_change_percentage_24h: 0.35,
-      market_cap: 12500000000000,
-      type: 'commodity' as const,
-    },
-    {
-      id: 'silver',
-      name: 'Silver',
-      symbol: 'XAG/USD',
-      current_price: 23.80,
-      price_change_percentage_24h: -0.42,
-      market_cap: 1400000000000,
-      type: 'commodity' as const,
-    },
-  ];
+        const formatDate = (date: Date) => {
+          return date.toISOString().split('T')[0];
+        };
 
-  // Fetch commodity data using Metal Price API
-  const fetchCommodityData = async () => {
-    try {
-      // Constants for market cap calculation
-      const GOLD_SUPPLY_TONS = 205000; // Total above-ground gold in metric tons
-      const SILVER_SUPPLY_TONS = 1740000; // Total above-ground silver in metric tons
-      const METRIC_TON_TO_OUNCES = 35274; // 1 metric ton = 35,274 ounces
+        const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
+          const marketCap = pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
+          return marketCap;
+        };
 
-      // Get yesterday's date for price change
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 2);
+        const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
+          const change = ((currentPrice - previousPrice) / previousPrice) * 100;
+          return change;
+        };
 
-      const formatDate = (date: Date) => {
-        return date.toISOString().split('T')[0];
-      };
+        const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
+          axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+            params: {
+              api_key: API_KEYS.METAL_PRICE,
+              currencies: 'XAU'
+            }
+          }),
+          axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+            params: {
+              api_key: API_KEYS.METAL_PRICE,
+              currencies: 'XAG'
+            }
+          }),
+          axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+            params: {
+              api_key: API_KEYS.METAL_PRICE,
+              currencies: 'XAU',
+            }
+          }),
+          axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+            params: {
+              api_key: API_KEYS.METAL_PRICE,
+              currencies: 'XAG',
+            }
+          })
+        ]);
 
-      const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
-        const marketCap = pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
-        return marketCap;
-      };
-
-      const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAU'
+        const commodityData = [
+          {
+            id: 'gold',
+            name: 'Gold',
+            symbol: 'XAU/USD',
+            current_price: goldPrice.data.rates.USDXAU,
+            market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
+            price_change_percentage_24h: calculatePriceChange(goldPrice.data.rates.USDXAU, yesterdayGold.data.rates.USDXAU),
+            type: 'commodity' as const,
+          },
+          {
+            id: 'silver',
+            name: 'Silver',
+            symbol: 'XAG/USD',
+            current_price: silverPrice.data.rates.USDXAG,
+            market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
+            price_change_percentage_24h: calculatePriceChange(silverPrice.data.rates.USDXAG, yesterdaySilver.data.rates.USDXAG),
+            type: 'commodity' as const,
           }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAG'
-          }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAU',
-          }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAG',
-          }
-        })
-      ]);
+        ];
 
-      const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
-        const change = ((currentPrice - previousPrice) / previousPrice) * 100;
-        return change;
-      };
-
-      const commodityData = [
-        {
-          id: 'gold',
-          name: 'Gold',
-          symbol: 'XAU/USD',
-          current_price: goldPrice.data.rates.USDXAU,
-          market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
-          price_change_percentage_24h: calculatePriceChange(goldPrice.data.rates.USDXAU, yesterdayGold.data.rates.USDXAU),
-          type: 'commodity' as const,
-        },
-        {
-          id: 'silver',
-          name: 'Silver',
-          symbol: 'XAG/USD',
-          current_price: silverPrice.data.rates.USDXAG,
-          market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
-          price_change_percentage_24h: calculatePriceChange(silverPrice.data.rates.USDXAG, yesterdaySilver.data.rates.USDXAG),
-          type: 'commodity' as const,
-        }
-      ];
-
-      return commodityData;
-    } catch (error) {
-      console.error('Error fetching commodity data:', error);
-      console.log('Using fallback commodity data');
-      return FALLBACK_COMMODITIES;
-    }
-  };
+        return commodityData;
+      } catch (error) {
+        console.error('Error fetching commodity data:', error);
+        console.log('Using fallback commodity data');
+        return FALLBACK_COMMODITIES;
+      }
+    };
 
     const fetchAllData = async () => {
       try {
@@ -214,10 +240,10 @@ export default function TopAssets() {
         ]);
 
         const allAssets = [...cryptoAssets, ...stockAssets, ...commodityAssets]
-          .sort((a, b) => b.market_cap - a.market_cap);
+          .sort((a, b) => b.market_cap - a.market_cap)
+          .slice(0, 10); // Take only top 10 assets
 
-
-          console.log("allAssets", allAssets)
+        console.log("allAssets", allAssets)
 
         setAssets(allAssets);
         setError(null);
@@ -230,7 +256,7 @@ export default function TopAssets() {
     };
 
     fetchAllData();
-    const interval = setInterval(fetchAllData, 5 * 60 * 1000); // Refresh every 5 minutes
+    const interval = setInterval(fetchAllData, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
   }, []);
@@ -249,7 +275,7 @@ export default function TopAssets() {
       style: 'currency',
       currency: 'USD',
       notation: 'compact',
-      maximumFractionDigits: 1,
+      maximumFractionDigits: 3,
     }).format(marketCap);
   };
 
@@ -259,13 +285,13 @@ export default function TopAssets() {
     // Default icons for different asset types
     switch (asset.type) {
       case 'stock':
-        return 'https://cdn-icons-png.flaticon.com/512/1067/1067357.png';
+        return ASSET_ICONS.STOCK[asset.symbol] || ASSET_ICONS.STOCK.DEFAULT;
       case 'commodity':
-        return asset.symbol === 'XAU' 
-          ? 'https://cdn-icons-png.flaticon.com/512/2687/2687757.png'
-          : 'https://cdn-icons-png.flaticon.com/512/2687/2687821.png';
+        return asset.symbol === 'XAU/USD' 
+          ? ASSET_ICONS.COMMODITY.GOLD 
+          : ASSET_ICONS.COMMODITY.SILVER;
       default:
-        return 'https://cdn-icons-png.flaticon.com/512/1667/1667033.png';
+        return ASSET_ICONS.DEFAULT;
     }
   };
 
@@ -317,17 +343,11 @@ export default function TopAssets() {
     );
   }
 
-  const groupedAssets = sortAssets(assets).reduce((acc, asset) => {
-    if (!acc[asset.type]) acc[asset.type] = [];
-    acc[asset.type].push(asset);
-    return acc;
-  }, {} as Record<string, Asset[]>);
-
   return (
     <div className="crypto-container p-6 animate-fade-in">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-200">
-          Top Market Assets
+          Top 10 Market Assets
         </h2>
         <select
           value={JSON.stringify(sortOption)}
@@ -341,61 +361,60 @@ export default function TopAssets() {
           ))}
         </select>
       </div>
-      <div className="space-y-6">
-        {Object.entries(groupedAssets).map(([type, assets]) => (
-          <div key={type} className="space-y-4">
-            <h3 className="text-md font-medium text-gray-400 uppercase tracking-wider pl-2">
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </h3>
-            {assets.map((asset) => (
-              <div
-                key={asset.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 group"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <img
-                      src={getAssetIcon(asset)}
-                      alt={asset.name}
-                      className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform duration-200"
-                    />
-                    <div className="absolute -top-1 -right-1">
-                      <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full ${
-                        asset.type === 'crypto' ? 'bg-yellow-500' :
-                        asset.type === 'stock' ? 'bg-blue-500' :
-                        'bg-green-500'
-                      }`}>
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
-                      {asset.name}
-                    </div>
-                    <div className="text-sm text-gray-400 uppercase">
-                      {asset.symbol}
-                    </div>
-                  </div>
+      <div className="space-y-4">
+        {sortAssets(assets).map((asset, index) => (
+          <div
+            key={asset.id}
+            className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 group"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="absolute -top-3 -left-3 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-sm text-gray-400">
+                  {index + 1}
                 </div>
-                <div className="text-right space-y-1">
-                  <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
-                    {formatPrice(asset.current_price)}
-                  </div>
-                  <div
-                    className={`text-sm ${
-                      asset.price_change_percentage_24h >= 0
-                        ? 'text-green-400'
-                        : 'text-red-400'
-                    }`}
-                  >
-                    {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'} {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    MCap: {formatMarketCap(asset.market_cap)}
-                  </div>
+                <img
+                  src={getAssetIcon(asset)}
+                  alt={asset.name}
+                  className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform duration-200"
+                />
+                <div className="absolute -top-1 -right-1">
+                  <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full ${
+                    asset.type === 'crypto' ? 'bg-yellow-500' :
+                    asset.type === 'stock' ? 'bg-blue-500' :
+                    'bg-green-500'
+                  }`}>
+                  </span>
                 </div>
               </div>
-            ))}
+              <div>
+                <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
+                  {asset.name}
+                </div>
+                <div className="text-sm text-gray-400">
+                  <span className="uppercase">{asset.symbol}</span>
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-white/5 text-xs">
+                    {asset.type}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right space-y-1">
+              <div className="font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
+                {formatPrice(asset.current_price)}
+              </div>
+              <div
+                className={`text-sm ${
+                  asset.price_change_percentage_24h >= 0
+                    ? 'text-green-400'
+                    : 'text-red-400'
+                }`}
+              >
+                {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'} {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
+              </div>
+              <div className="text-xs text-gray-400">
+                MCap: {formatMarketCap(asset.market_cap)}
+              </div>
+            </div>
           </div>
         ))}
       </div>
