@@ -53,14 +53,14 @@ export function useMarketData(): UseMarketDataReturn {
           }
         );
 
-        const cryptoAssets = cryptoResponse.data.map((coin) => ({
+        const cryptoAssets: Asset[] = cryptoResponse.data.map((coin: CoinGeckoAsset) => ({
           id: coin.id,
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
-          current_price: coin.current_price,
-          price_change_percentage_24h: coin.price_change_percentage_24h,
-          market_cap: coin.market_cap,
-          type: 'crypto' as const,
+          currentPrice: coin.current_price,
+          priceChange24h: coin.price_change_percentage_24h,
+          marketCap: coin.market_cap,
+          type: 'crypto',
         }));
 
         // Fetch stocks and commodities from our cached API
@@ -68,7 +68,7 @@ export function useMarketData(): UseMarketDataReturn {
         const { stocks, commodities } = marketResponse.data;
 
         const allAssets = [...cryptoAssets, ...stocks, ...commodities]
-          .sort((a, b) => b.market_cap - a.market_cap)
+          .sort((a, b) => b.marketCap - a.marketCap)
           .slice(0, 10);
 
         setAssets(allAssets);

@@ -5,7 +5,7 @@ interface TimeframeSelectorProps {
   onTimeframeChange: (timeframe: TimeframeOption) => void;
 }
 
-const timeframeOptions: TimeframeOption[] = [
+export const timeframeOptions: TimeframeOption[] = [
   { label: '24h', days: 1 },
   { label: '7d', days: 7 },
   { label: '30d', days: 30 },

@@ -3,25 +3,28 @@
 import { useState } from 'react';
 import MobileBitcoinChart from '../../components/mobile/MobileBitcoinChart';
 import MobileTopAssets from '../../components/mobile/MobileTopAssets';
-import TimeframeSelector from '../../components/TimeframeSelector';
+import TimeframeSelector, { timeframeOptions } from '../../components/TimeframeSelector';
 import { usePriceHistory } from '../../hooks/usePriceHistory';
 
-const timeframeOptions = [
-  { label: '24H', days: 1, interval: 'hourly' },
-  { label: '7D', days: 7, interval: 'daily' },
-  { label: '30D', days: 30, interval: 'daily' },
-  { label: '90D', days: 90, interval: 'daily' },
-];
+
+const formatPrice = (price: number | undefined): string => {
+  if (typeof price !== 'number') return '-.--';
+  return price.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
 
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState(timeframeOptions[0]);
-  const { priceData, isLoading } = usePriceHistory(selectedTimeframe);
+  const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
 
+  // Calculate price change only when we have valid data
   const currentPrice = priceData.prices[priceData.prices.length - 1];
   const previousPrice = priceData.prices[priceData.prices.length - 2];
-  const priceChange = currentPrice && previousPrice 
+  const priceChange = (!isLoading && currentPrice && previousPrice)
     ? ((currentPrice - previousPrice) / previousPrice) * 100
-    : 0;
+    : null;
 
   return (
     <main className="min-h-screen bg-gray-900 text-white">
@@ -35,19 +38,22 @@ export default function MobilePage() {
           
           {/* Current Price */}
           <div className="mt-2 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold">
-              ${currentPrice?.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }) || '-.--'}
-            </span>
-            {!isLoading && currentPrice && (
-              <span className={`text-sm font-medium ${
-                priceChange >= 0 ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {priceChange >= 0 ? '↑' : '↓'}
-                {Math.abs(priceChange).toFixed(2)}%
-              </span>
+            {error ? (
+              <span className="text-sm text-red-400">{error}</span>
+            ) : (
+              <>
+                <span className={`text-2xl font-bold ${isLoading ? 'animate-pulse' : ''}`}>
+                  ${formatPrice(currentPrice)}
+                </span>
+                {priceChange !== null && (
+                  <span className={`text-sm font-medium ${
+                    priceChange >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {priceChange >= 0 ? '↑' : '↓'}
+                    {Math.abs(priceChange).toFixed(2)}%
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -55,11 +61,10 @@ export default function MobilePage() {
         {/* Timeframe Selector */}
         <div className="px-4 pb-3">
           <TimeframeSelector
-            options={timeframeOptions}
-            selected={selectedTimeframe}
-            onChange={setSelectedTimeframe}
-            className="grid grid-cols-4 gap-2 text-sm"
-            buttonClassName="py-1.5 font-medium"
+            selectedTimeframe={selectedTimeframe}
+            onTimeframeChange={setSelectedTimeframe}
+            // className="grid grid-cols-4 gap-2 text-sm"
+            // buttonClassName="py-1.5 font-medium"
           />
         </div>
       </div>

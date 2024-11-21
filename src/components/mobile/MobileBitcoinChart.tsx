@@ -74,7 +74,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
       x: {
         grid: {
           display: false,
-          drawBorder: false,
+          drawOnChartArea: false,
         },
         ticks: {
           maxTicksLimit: getMaxTicksLimit(selectedTimeframe.days),
@@ -88,7 +88,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
         position: 'right' as const,
         grid: {
           color: 'rgba(75, 85, 99, 0.1)',
-          drawBorder: false,
+          drawOnChartArea: false,
         },
         ticks: {
           color: '#9CA3AF',

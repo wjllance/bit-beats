@@ -61,28 +61,34 @@ export default function MobileTopAssets() {
                       <span className="text-gray-400 text-xs">{asset.type}</span>
                     </div>
                     <span className="text-gray-400 text-xs">
-                      {formatMarketCap(asset.market_cap)}
+                      {formatMarketCap(asset.marketCap)}
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <div className="text-white text-sm font-medium">
-                    ${asset.current_price.toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                  <div className="flex items-center">
+                    <span
+                      className="text-sm"
+                    >
+                      ${asset.currentPrice.toLocaleString()}
+                    </span>
+                    <span
+                      className="ml-2 text-xs"
+                    >
+                      {asset.priceChange24h >= 0 ? '+' : ''}
+                      {asset.priceChange24h.toFixed(2)}%
+                    </span>
                   </div>
                   <div 
                     className={`text-xs flex items-center space-x-1 ${
-                      asset.price_change_percentage_24h >= 0 
+                      asset.priceChange24h >= 0 
                         ? 'text-green-400' 
                         : 'text-red-400'
                     }`}
                   >
                     <span className="transition-transform group-active:scale-110">
-                      {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
+                      {asset.priceChange24h >= 0 ? '↑' : '↓'}
                     </span>
-                    <span>{Math.abs(asset.price_change_percentage_24h).toFixed(2)}%</span>
                   </div>
                 </div>
               </div>
