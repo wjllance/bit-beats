@@ -1,3 +1,4 @@
+import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,11 +8,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler,
+  ChartOptions,
+  ChartData,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { PriceData, TimeframeOption } from '../types';
-import { getMaxTicksLimit } from '../utils/dateFormatter';
+import { PriceData } from '../types';
 
 ChartJS.register(
   CategoryScale,
@@ -20,46 +20,48 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 );
 
 interface BitcoinChartProps {
   priceData: PriceData;
-  selectedTimeframe: TimeframeOption;
   isLoading: boolean;
 }
 
-export default function BitcoinChart({
-  priceData,
-  selectedTimeframe,
-  isLoading,
-}: BitcoinChartProps) {
-  const options = {
+export default function BitcoinChart({ priceData, isLoading }: BitcoinChartProps) {
+  const chartData: ChartData<'line'> = {
+    labels: priceData.labels,
+    datasets: [
+      {
+        label: 'Bitcoin Price',
+        data: priceData.prices,
+        borderColor: 'rgb(234, 179, 8)',
+        backgroundColor: 'rgba(234, 179, 8, 0.5)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: {
-      mode: 'index' as const,
-      intersect: false,
-    },
     plugins: {
       legend: {
         display: false,
       },
+      title: {
+        display: false,
+      },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.9)',
-        titleColor: '#F59E0B',
-        bodyColor: '#fff',
-        borderColor: '#F59E0B',
-        borderWidth: 1,
-        padding: 12,
-        displayColors: false,
+        mode: 'index',
+        intersect: false,
         callbacks: {
-          title: (tooltipItems: any) => {
-            return tooltipItems[0].label;
-          },
-          label: (context: any) => {
-            return `$${context.parsed.y.toLocaleString('en-US', {
+          label: (context) => {
+            const value = context.parsed.y;
+            return `$${value.toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`;
@@ -67,73 +69,49 @@ export default function BitcoinChart({
         },
       },
     },
+    interaction: {
+      mode: 'nearest',
+      axis: 'x',
+      intersect: false,
+    },
     scales: {
       x: {
+        display: true,
         grid: {
           display: false,
-          drawBorder: false,
         },
         ticks: {
-          maxTicksLimit: getMaxTicksLimit(selectedTimeframe.days),
-          color: '#9CA3AF',
+          maxTicksLimit: 8,
+          color: 'rgb(156, 163, 175)',
         },
       },
       y: {
-        position: 'right' as const,
+        display: true,
         grid: {
-          color: 'rgba(75, 85, 99, 0.1)',
-          drawBorder: false,
+          color: 'rgba(75, 85, 99, 0.2)',
         },
         ticks: {
-          color: '#9CA3AF',
-          callback: (value: any) => {
-            return '$' + value.toLocaleString('en-US', {
+          color: 'rgb(156, 163, 175)',
+          callback: (value) => {
+            return `$${value.toLocaleString('en-US', {
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
-            });
+            })}`;
           },
         },
       },
     },
   };
 
-  const data = {
-    labels: priceData.labels,
-    datasets: [
-      {
-        data: priceData.prices,
-        borderColor: '#F59E0B',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 0,
-        pointHitRadius: 10,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#F59E0B',
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2,
-      },
-    ],
-  };
+  if (isLoading) {
+    return (
+      <div className="w-full h-[400px] bg-gray-900 rounded-lg animate-pulse" />
+    );
+  }
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
-        {isLoading && (
-          <span className="text-sm text-gray-400 animate-pulse">Updating...</span>
-        )}
-      </div>
-      <div className="relative h-[400px] w-full">
-        {priceData.labels.length > 0 ? (
-          <Line options={options} data={data} />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-gray-400">Loading chart data...</span>
-          </div>
-        )}
-      </div>
+    <div className="w-full h-[400px] bg-gray-900 p-4 rounded-lg">
+      <Line data={chartData} options={options} />
     </div>
   );
 }

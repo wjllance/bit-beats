@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { MarketData, CoinGeckoResponse } from '../types';
 
 // Constants for market data
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-// Constants for commodity calculations
 
 const formatMarketCap = (marketCap: number): string => {
   if (marketCap >= 1e12) {
@@ -18,74 +17,13 @@ const formatMarketCap = (marketCap: number): string => {
   }
 };
 
-// Fallback commodity data
-const FALLBACK_COMMODITIES = [
-  {
-    id: 'gold',
-    name: 'Gold',
-    symbol: 'XAU/USD',
-    current_price: 2619.50,
-    price_change_percentage_24h: 0.35,
-    market_cap: 17500000000000,
-    type: 'commodity' as const,
-  },
-  {
-    id: 'silver',
-    name: 'Silver',
-    symbol: 'XAG/USD',
-    current_price: 30.88,
-    price_change_percentage_24h: -0.42,
-    market_cap: 1730000000000,
-    type: 'commodity' as const,
-  },
-];
-
-// API Configuration
-const API_KEYS = {
-  FMP: process.env.NEXT_PUBLIC_FMP_API_KEY || 'demo',
-  METAL_PRICE: process.env.NEXT_PUBLIC_METAL_PRICE_API_KEY || 'demo',
-};
-
-const API_ENDPOINTS = {
-  COINGECKO: 'https://api.coingecko.com/api/v3',
-  FMP: 'https://financialmodelingprep.com/api/v3',
-  METAL_PRICE: 'https://api.metalpriceapi.com/v1',
-};
-
-interface Asset {
-  id: string;
-  name: string;
-  symbol: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  type: 'crypto' | 'stock' | 'commodity';
-}
-
-interface SortOption {
-  label: string;
-  value: keyof Asset | null;
-  direction: 'asc' | 'desc';
-}
-
 interface TopAssetsProps {
   position: 'left' | 'right';
 }
 
 export default function TopAssets({ position }: TopAssetsProps) {
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<MarketData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState<SortOption>({
-    label: 'Market Cap',
-    value: 'market_cap',
-    direction: 'desc'
-  });
-
-  const sortOptions: SortOption[] = [
-    { label: 'Market Cap', value: 'market_cap', direction: 'desc' },
-    { label: 'Price', value: 'current_price', direction: 'desc' },
-    { label: '24h Change', value: 'price_change_percentage_24h', direction: 'desc' },
-  ];
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -93,8 +31,8 @@ export default function TopAssets({ position }: TopAssetsProps) {
         setIsLoading(true);
         
         // Fetch crypto data
-        const cryptoResponse = await axios.get(
-          `${API_ENDPOINTS.COINGECKO}/coins/markets`,
+        const cryptoResponse = await axios.get<CoinGeckoResponse[]>(
+          'https://api.coingecko.com/api/v3/coins/markets',
           {
             params: {
               vs_currency: 'usd',
@@ -106,18 +44,18 @@ export default function TopAssets({ position }: TopAssetsProps) {
           }
         );
         
-        const cryptoAssets = cryptoResponse.data.map((coin: any) => ({
+        const cryptoAssets: MarketData[] = cryptoResponse.data.map((coin) => ({
           id: coin.id,
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
           current_price: coin.current_price,
           price_change_percentage_24h: coin.price_change_percentage_24h,
           market_cap: coin.market_cap,
-          type: 'crypto' as const,
+          type: 'crypto',
         }));
 
         // Fetch stocks and commodities from our cached API
-        const marketResponse = await axios.get('/api/market-data');
+        const marketResponse = await axios.get<{ stocks: MarketData[]; commodities: MarketData[] }>('/api/market-data');
         const { stocks, commodities } = marketResponse.data;
 
         const allAssets = [...cryptoAssets, ...stocks, ...commodities]
@@ -138,15 +76,8 @@ export default function TopAssets({ position }: TopAssetsProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const sortedAssets = [...assets].sort((a, b) => {
-    if (!sortConfig.value) return 0;
-    const aValue = a[sortConfig.value];
-    const bValue = b[sortConfig.value];
-    return sortConfig.direction === 'desc' ? 
-      (bValue as number) - (aValue as number) : 
-      (aValue as number) - (bValue as number);
-  });
-
+  const sortedAssets = [...assets];
+  
   // Get the appropriate slice of assets based on position
   const displayedAssets = position === 'left' ? 
     sortedAssets.slice(0, 5) : 
@@ -156,56 +87,50 @@ export default function TopAssets({ position }: TopAssetsProps) {
   const title = position === 'left' ? 'Top 5 Assets' : 'Next 5 Assets';
 
   return (
-    <div className="w-full">
-      <h2 className="text-lg font-semibold text-yellow-500/90 mb-4 hover:text-yellow-400/90 transition-colors duration-300">{title}</h2>
-      <div className="space-y-4">
-        {displayedAssets.map((asset, index) => {
-          const rank = startRank + index;
-          return (
+    <div className="flex flex-col gap-4 p-4 bg-gray-900 rounded-lg shadow-lg">
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {displayedAssets.map((asset, index) => (
             <div
-              key={rank}
-              className="group flex items-center justify-between p-3 bg-gray-800/70 rounded-lg 
-                hover:bg-gray-700/80 transition-all duration-300 cursor-pointer 
-                hover:shadow-[0_0_15px_rgba(234,179,8,0.1)] hover:shadow-yellow-600/5
-                border border-transparent hover:border-yellow-900/30
-                transform hover:scale-[1.23] hover:-translate-y-0.5 hover:z-10"
+              key={asset.id}
+              className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all duration-300 transform hover:scale-105"
             >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-yellow-500/20 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-                  <span className="relative text-gray-400 text-sm w-6 transition-colors duration-300 group-hover:text-yellow-500">{rank}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white font-medium transition-all duration-300 group-hover:text-yellow-500 group-hover:translate-x-1">{asset.symbol}</span>
-                  <span className="text-gray-400 text-xs transition-all duration-300 group-hover:text-gray-300 group-hover:translate-x-1">
-                    {formatMarketCap(asset.market_cap)}
-                  </span>
+              <div className="flex items-center gap-4">
+                <span className="text-lg font-semibold text-gray-400">
+                  #{startRank + index}
+                </span>
+                <div>
+                  <h3 className="font-bold text-white">{asset.name}</h3>
+                  <p className="text-sm text-gray-400">{asset.symbol}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-6">
-                <div className="text-right">
-                  <div className="text-white font-medium transition-all duration-300 group-hover:text-yellow-500">${asset.current_price.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}</div>
-                  <div 
-                    className={`text-xs transform transition-all duration-300 group-hover:translate-y-[-1px] flex items-center justify-end space-x-1 ${
-                      asset.price_change_percentage_24h >= 0 
-                        ? 'text-green-400 group-hover:text-green-300' 
-                        : 'text-red-400 group-hover:text-red-300'
-                    }`}
-                  >
-                    <span className="transition-transform duration-300 group-hover:scale-125">
-                      {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
-                    </span>
-                    <span>{Math.abs(asset.price_change_percentage_24h).toFixed(2)}%</span>
-                  </div>
-                </div>
+              <div className="text-right">
+                <p className="font-bold text-white">
+                  ${asset.current_price.toLocaleString()}
+                </p>
+                <p
+                  className={`text-sm ${
+                    asset.price_change_percentage_24h >= 0
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }`}
+                >
+                  {asset.price_change_percentage_24h >= 0 ? '+' : ''}
+                  {asset.price_change_percentage_24h.toFixed(2)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {formatMarketCap(asset.market_cap)}
+                </p>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
