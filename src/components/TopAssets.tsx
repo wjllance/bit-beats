@@ -274,6 +274,9 @@ export default function TopAssets({ position }: TopAssetsProps) {
     sortedAssets.slice(0, 5) : 
     sortedAssets.slice(5, 10);
 
+  const startRank = position === 'left' ? 1 : 6;
+  const title = position === 'left' ? 'Top 5 Assets' : 'Next 5 Assets';
+
   const getAssetIcon = (asset: Asset) => {
     if (asset.type === 'stock') {
       return ASSET_ICONS.STOCK[asset.symbol as keyof typeof ASSET_ICONS.STOCK] || ASSET_ICONS.STOCK.DEFAULT;
@@ -284,72 +287,41 @@ export default function TopAssets({ position }: TopAssetsProps) {
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <h2 className="text-lg font-semibold text-yellow-500">
-          {position === 'left' ? 'Top 1-5' : 'Top 6-10'}
-        </h2>
-        {isLoading && (
-          <span className="text-sm text-gray-400 animate-pulse">Updating...</span>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-hidden">
-        <div className="overflow-y-auto h-full">
-          {displayedAssets.map((asset, index) => {
-            const isBitcoin = asset.symbol.toLowerCase() === 'btc';
-            const actualRank = position === 'left' ? index + 1 : index + 6;
-            
-            return (
-              <div
-                key={asset.id}
-                className={`border-b border-gray-700 last:border-b-0 ${
-                  isBitcoin ? 'bg-yellow-500 bg-opacity-5' : ''
-                } hover:bg-gray-700 transition-colors duration-200`}
-              >
-                <div className="p-4 flex items-center space-x-4">
-                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full 
-                    ${isBitcoin ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
-                    {actualRank}
-                  </span>
-                  
-                  <div className="flex items-center flex-1 min-w-0">
-                    <img 
-                      src={getAssetIcon(asset)} 
-                      alt={asset.name} 
-                      className="w-6 h-6 mr-3 flex-shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <div className={`text-sm font-medium truncate ${
-                        isBitcoin ? 'text-yellow-500' : 'text-white'
-                      }`}>
-                        {asset.name}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {asset.symbol.toUpperCase()}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-sm text-white">
-                      ${asset.current_price.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </div>
-                    <div className={`text-xs ${
-                      asset.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {asset.price_change_percentage_24h >= 0 ? '+' : ''}
-                      {asset.price_change_percentage_24h.toFixed(2)}%
-                    </div>
-                  </div>
+    <div className="w-full">
+      <h2 className="text-lg font-semibold text-yellow-500/90 mb-4">{title}</h2>
+      <div className="space-y-4">
+        {displayedAssets.map((asset, index) => {
+          const rank = startRank + index;
+          const isBitcoin = asset.symbol.toLowerCase() === 'btc';
+          return (
+            <div
+              key={rank}
+              className="flex items-center justify-between p-3 bg-gray-800/70 rounded-lg hover:bg-gray-700/70 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-400 text-sm w-6">{rank}</span>
+                <img 
+                  src={getAssetIcon(asset)} 
+                  alt={asset.name} 
+                  className="w-6 h-6 mr-3 flex-shrink-0"
+                />
+                <span className="text-white">{asset.name}</span>
+              </div>
+              <div className="text-right">
+                <div className="text-white">${asset.current_price.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}</div>
+                <div className={`text-xs ${
+                  asset.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {asset.price_change_percentage_24h >= 0 ? '+' : ''}
+                  {asset.price_change_percentage_24h.toFixed(2)}%
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

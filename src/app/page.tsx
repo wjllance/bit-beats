@@ -51,38 +51,44 @@ export default function BitcoinPriceTracker() {
   }, [selectedTimeframe]);
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-4">
-      <div className="max-w-7xl mx-auto space-y-4">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <PriceDisplay currentPrice={currentPrice} />
         
-        <div className="grid grid-cols-12 gap-4">
+        <div className="grid grid-cols-12 gap-6">
           {/* Left side assets */}
           <div className="col-span-3">
-            <TopAssets position="left" />
+            <div className="bg-gray-800/50 rounded-lg p-4 h-full">
+              <TopAssets position="left" />
+            </div>
           </div>
 
           {/* Center chart */}
-          <div className="col-span-6 bg-gray-800 rounded-lg p-4">
-            <div className="mb-3">
-              <TimeframeSelector
+          <div className="col-span-6">
+            <div className="bg-gray-800/50 rounded-lg p-6">
+              <div className="mb-4">
+                <TimeframeSelector
+                  selectedTimeframe={selectedTimeframe}
+                  onTimeframeChange={setSelectedTimeframe}
+                />
+              </div>
+              <BitcoinChart
+                priceData={priceData}
                 selectedTimeframe={selectedTimeframe}
-                onTimeframeChange={setSelectedTimeframe}
+                isLoading={isLoading}
               />
             </div>
-            <BitcoinChart
-              priceData={priceData}
-              selectedTimeframe={selectedTimeframe}
-              isLoading={isLoading}
-            />
           </div>
 
           {/* Right side assets */}
           <div className="col-span-3">
-            <TopAssets position="right" />
+            <div className="bg-gray-800/50 rounded-lg p-4 h-full">
+              <TopAssets position="right" />
+            </div>
           </div>
         </div>
 
-        <footer className="text-center mt-4 text-yellow-500 text-xs">
+        <footer className="text-center mt-6 text-yellow-500/80 text-sm">
           <p>Data provided by CoinGecko API • Updated every 5 minutes</p>
         </footer>
       </div>
