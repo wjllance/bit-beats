@@ -56,8 +56,7 @@ interface TopAssetsProps {
 
 export default function TopAssets({ position }: TopAssetsProps): JSX.Element {
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState<SortOption>({
+  const [sortConfig] = useState<SortOption>({
     label: 'Market Cap',
     value: 'market_cap',
     direction: 'desc'
@@ -67,8 +66,6 @@ export default function TopAssets({ position }: TopAssetsProps): JSX.Element {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        setIsLoading(true);
-        
         // Fetch crypto data
         const cryptoResponse = await axios.get(
           `${API_ENDPOINTS.COINGECKO}/coins/markets`,
@@ -104,8 +101,6 @@ export default function TopAssets({ position }: TopAssetsProps): JSX.Element {
         setAssets(allAssets);
       } catch (err: unknown) {
         console.error('Error fetching data:', err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
       }
     };
 
