@@ -62,7 +62,13 @@ export default function BitcoinPriceTracker() {
           </div>
 
           {/* Center chart */}
-          <div className="col-span-6">
+          <div className="col-span-6 bg-gray-800 rounded-lg p-4">
+            <div className="mb-3">
+              <TimeframeSelector
+                selectedTimeframe={selectedTimeframe}
+                onTimeframeChange={setSelectedTimeframe}
+              />
+            </div>
             <BitcoinChart
               priceData={priceData}
               selectedTimeframe={selectedTimeframe}
@@ -75,6 +81,10 @@ export default function BitcoinPriceTracker() {
             <TopAssets position="right" />
           </div>
         </div>
+
+        <footer className="text-center mt-4 text-yellow-500 text-xs">
+          <p>Data provided by CoinGecko API • Updated every 5 minutes</p>
+        </footer>
       </div>
     </main>
   );
