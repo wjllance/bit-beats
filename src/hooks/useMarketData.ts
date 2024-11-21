@@ -8,7 +8,27 @@ const API_ENDPOINTS = {
   COINGECKO: 'https://api.coingecko.com/api/v3',
 };
 
-export function useMarketData() {
+interface CoinGeckoAsset {
+  id: string;
+  name: string;
+  symbol: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
+}
+
+interface MarketResponse {
+  stocks: Asset[];
+  commodities: Asset[];
+}
+
+interface UseMarketDataReturn {
+  assets: Asset[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+export function useMarketData(): UseMarketDataReturn {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +40,7 @@ export function useMarketData() {
         setError(null);
 
         // Fetch crypto data
-        const cryptoResponse = await axios.get(
+        const cryptoResponse = await axios.get<CoinGeckoAsset[]>(
           `${API_ENDPOINTS.COINGECKO}/coins/markets`,
           {
             params: {
@@ -33,7 +53,7 @@ export function useMarketData() {
           }
         );
 
-        const cryptoAssets = cryptoResponse.data.map((coin: any) => ({
+        const cryptoAssets = cryptoResponse.data.map((coin) => ({
           id: coin.id,
           name: coin.name,
           symbol: coin.symbol.toUpperCase(),
@@ -44,7 +64,7 @@ export function useMarketData() {
         }));
 
         // Fetch stocks and commodities from our cached API
-        const marketResponse = await axios.get('/api/market-data');
+        const marketResponse = await axios.get<MarketResponse>('/api/market-data');
         const { stocks, commodities } = marketResponse.data;
 
         const allAssets = [...cryptoAssets, ...stocks, ...commodities]
@@ -52,7 +72,7 @@ export function useMarketData() {
           .slice(0, 10);
 
         setAssets(allAssets);
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to fetch market data');
         console.error('Error fetching data:', err);
       } finally {
