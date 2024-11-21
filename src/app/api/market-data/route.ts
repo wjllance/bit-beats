@@ -1,9 +1,25 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
+interface MarketData {
+  id: string;
+  name: string;
+  symbol: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
+  type: 'crypto' | 'stock' | 'commodity';
+}
+
+interface CachedData {
+  stocks: MarketData[];
+  commodities: MarketData[];
+  timestamp?: number;
+}
+
 // Cache configuration
-const CACHE_DURATION = 60 * 60 * 1000; // 5 minutes in milliseconds
-let cachedData: any = null;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+let cachedData: CachedData | null = null;
 let lastFetchTime: number = 0;
 
 // Constants
@@ -23,54 +39,113 @@ const API_ENDPOINTS = {
   METAL_PRICE: 'https://api.metalpriceapi.com/v1',
 };
 
-async function fetchStockData() {
+// Fallback data
+const FALLBACK_DATA: CachedData = {
+  stocks: [
+    {
+      id: 'AAPL',
+      name: 'Apple Inc.',
+      symbol: 'AAPL',
+      current_price: 169.90,
+      price_change_percentage_24h: 0.85,
+      market_cap: 2650000000000,
+      type: 'stock',
+    },
+    {
+      id: 'MSFT',
+      name: 'Microsoft Corporation',
+      symbol: 'MSFT',
+      current_price: 425.22,
+      price_change_percentage_24h: 1.25,
+      market_cap: 3160000000000,
+      type: 'stock',
+    },
+  ],
+  commodities: [
+    {
+      id: 'gold',
+      name: 'Gold',
+      symbol: 'XAU/USD',
+      current_price: 2619.50,
+      price_change_percentage_24h: 0.35,
+      market_cap: 17500000000000,
+      type: 'commodity',
+    },
+    {
+      id: 'silver',
+      name: 'Silver',
+      symbol: 'XAG/USD',
+      current_price: 30.88,
+      price_change_percentage_24h: -0.42,
+      market_cap: 1730000000000,
+      type: 'commodity',
+    },
+  ],
+};
+
+interface StockResponse {
+  symbol: string;
+  name: string;
+  price: number;
+  changesPercentage: number;
+  marketCap: number;
+}
+
+interface MetalPriceResponse {
+  rates: {
+    USDXAU?: number;
+    USDXAG?: number;
+  };
+}
+
+async function fetchStockData(): Promise<MarketData[]> {
   try {
-    const response = await axios.get(
+    const response = await axios.get<StockResponse[]>(
       `${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`,
       { params: { apikey: API_KEYS.FMP } }
     );
-    return response.data.map((stock: any) => ({
+    return response.data.map((stock) => ({
       id: stock.symbol,
       name: stock.name,
       symbol: stock.symbol,
       current_price: stock.price,
       price_change_percentage_24h: stock.changesPercentage,
       market_cap: stock.marketCap,
-      type: 'stock' as const,
+      type: 'stock',
     }));
   } catch (error) {
     console.error('Error fetching stock data:', error);
-    return [];
+    return FALLBACK_DATA.stocks;
   }
 }
 
-async function fetchCommodityData() {
+async function fetchCommodityData(): Promise<MarketData[]> {
   try {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 
-    const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
+    const calculateMarketCap = (pricePerOunce: number, supplyTons: number): number => {
       return pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
     };
 
-    const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
+    const calculatePriceChange = (currentPrice: number, previousPrice: number): number => {
       return ((currentPrice - previousPrice) / previousPrice) * 100;
     };
 
     const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
-      axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
         params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAU' }
       }),
-      axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
         params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAG' }
       }),
-      axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
         params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAU' }
       }),
-      axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
+      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
         params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAG' }
       })
     ]);
@@ -80,30 +155,30 @@ async function fetchCommodityData() {
         id: 'gold',
         name: 'Gold',
         symbol: 'XAU/USD',
-        current_price: goldPrice.data.rates.USDXAU,
-        market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
+        current_price: goldPrice.data.rates.USDXAU || 0,
+        market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU || 0, GOLD_SUPPLY_TONS),
         price_change_percentage_24h: calculatePriceChange(
-          goldPrice.data.rates.USDXAU,
-          yesterdayGold.data.rates.USDXAU
+          goldPrice.data.rates.USDXAU || 0,
+          yesterdayGold.data.rates.USDXAU || 0
         ),
-        type: 'commodity' as const,
+        type: 'commodity',
       },
       {
         id: 'silver',
         name: 'Silver',
         symbol: 'XAG/USD',
-        current_price: silverPrice.data.rates.USDXAG,
-        market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
+        current_price: silverPrice.data.rates.USDXAG || 0,
+        market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG || 0, SILVER_SUPPLY_TONS),
         price_change_percentage_24h: calculatePriceChange(
-          silverPrice.data.rates.USDXAG,
-          yesterdaySilver.data.rates.USDXAG
+          silverPrice.data.rates.USDXAG || 0,
+          yesterdaySilver.data.rates.USDXAG || 0
         ),
-        type: 'commodity' as const,
+        type: 'commodity',
       }
     ];
   } catch (error) {
     console.error('Error fetching commodity data:', error);
-    return [];
+    return FALLBACK_DATA.commodities;
   }
 }
 
@@ -123,13 +198,13 @@ export async function GET() {
     ]);
 
     // Update cache
-    cachedData = { stocks, commodities };
+    cachedData = { stocks, commodities, timestamp: currentTime };
     lastFetchTime = currentTime;
 
     return NextResponse.json(cachedData);
   } catch (error) {
     console.error('Error fetching market data:', error);
-    // Return last cached data if available, otherwise return empty data
-    return NextResponse.json(cachedData || { stocks: [], commodities: [] });
+    // Return last cached data if available, otherwise return fallback data
+    return NextResponse.json(cachedData || FALLBACK_DATA);
   }
 }
