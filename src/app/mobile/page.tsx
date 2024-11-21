@@ -59,8 +59,16 @@ export default function MobilePage() {
       <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-yellow-500">BTC Beats</h1>
-            <span className="text-sm text-gray-400">BTC/USD</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                <span className="text-gray-900 font-bold">₿</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text">
+                  BTC Beats
+                </h1>
+              </div>
+            </div>
           </div>
           
           <div className="mt-1">
