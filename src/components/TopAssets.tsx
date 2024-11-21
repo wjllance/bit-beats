@@ -91,143 +91,40 @@ export default function TopAssets({ position }: TopAssetsProps) {
     { label: '24h Change', value: 'price_change_percentage_24h', direction: 'desc' },
   ];
 
-  const fetchCryptoData = async () => {
-    try {
-      const response = await axios.get(
-        `${API_ENDPOINTS.COINGECKO}/coins/markets`,
-        {
-          params: {
-            vs_currency: 'usd',
-            order: 'market_cap_desc',
-            per_page: 5,
-            page: 1,
-            sparkline: false,
-          },
-        }
-      );
-      return response.data.map((coin: any) => ({
-        id: coin.id,
-        name: coin.name,
-        symbol: coin.symbol.toUpperCase(),
-        current_price: coin.current_price,
-        price_change_percentage_24h: coin.price_change_percentage_24h,
-        market_cap: coin.market_cap,
-        type: 'crypto' as const,
-      }));
-    } catch (error) {
-      console.error('Error fetching crypto data:', error);
-      return [];
-    }
-  };
-
-  const fetchStockData = async () => {
-    try {
-      const response = await axios.get(`${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`, {
-        params: { apikey: API_KEYS.FMP }
-      });
-      return response.data.map((stock: any) => ({
-        id: stock.symbol,
-        name: stock.name,
-        symbol: stock.symbol,
-        current_price: stock.price,
-        price_change_percentage_24h: stock.changesPercentage,
-        market_cap: stock.marketCap,
-        type: 'stock' as const,
-      }));
-    } catch (error) {
-      console.error('Error fetching stock data:', error);
-      return [];
-    }
-  };
-
-  const fetchCommodityData = async () => {
-    try {
-      // Get yesterday's date for price change
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 2);
-
-      const formatDate = (date: Date) => {
-        return date.toISOString().split('T')[0];
-      };
-
-      const calculateMarketCap = (pricePerOunce: number, supplyTons: number) => {
-        const marketCap = pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
-        return marketCap;
-      };
-
-      const calculatePriceChange = (currentPrice: number, previousPrice: number) => {
-        const change = ((currentPrice - previousPrice) / previousPrice) * 100;
-        return change;
-      };
-
-      const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAU'
-          }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAG'
-          }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAU',
-          }
-        }),
-        axios.get(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-          params: {
-            api_key: API_KEYS.METAL_PRICE,
-            currencies: 'XAG',
-          }
-        })
-      ]);
-
-      const commodityData = [
-        {
-          id: 'gold',
-          name: 'Gold',
-          symbol: 'XAU/USD',
-          current_price: goldPrice.data.rates.USDXAU,
-          market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU, GOLD_SUPPLY_TONS),
-          price_change_percentage_24h: calculatePriceChange(goldPrice.data.rates.USDXAU, yesterdayGold.data.rates.USDXAU),
-          type: 'commodity' as const,
-        },
-        {
-          id: 'silver',
-          name: 'Silver',
-          symbol: 'XAG/USD',
-          current_price: silverPrice.data.rates.USDXAG,
-          market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG, SILVER_SUPPLY_TONS),
-          price_change_percentage_24h: calculatePriceChange(silverPrice.data.rates.USDXAG, yesterdaySilver.data.rates.USDXAG),
-          type: 'commodity' as const,
-        }
-      ];
-
-      return commodityData;
-    } catch (error) {
-      console.error('Error fetching commodity data:', error);
-      console.log('Using fallback commodity data');
-      return FALLBACK_COMMODITIES;
-    }
-  };
-
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setIsLoading(true);
-        const [cryptoAssets, stockAssets, commodityAssets] = await Promise.all([
-          fetchCryptoData(),
-          fetchStockData(),
-          fetchCommodityData()
-        ]);
+        
+        // Fetch crypto data
+        const cryptoResponse = await axios.get(
+          `${API_ENDPOINTS.COINGECKO}/coins/markets`,
+          {
+            params: {
+              vs_currency: 'usd',
+              order: 'market_cap_desc',
+              per_page: 5,
+              page: 1,
+              sparkline: false,
+            },
+          }
+        );
+        
+        const cryptoAssets = cryptoResponse.data.map((coin: any) => ({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol.toUpperCase(),
+          current_price: coin.current_price,
+          price_change_percentage_24h: coin.price_change_percentage_24h,
+          market_cap: coin.market_cap,
+          type: 'crypto' as const,
+        }));
 
-        const allAssets = [...cryptoAssets, ...stockAssets, ...commodityAssets]
+        // Fetch stocks and commodities from our cached API
+        const marketResponse = await axios.get('/api/market-data');
+        const { stocks, commodities } = marketResponse.data;
+
+        const allAssets = [...cryptoAssets, ...stocks, ...commodities]
           .sort((a, b) => b.market_cap - a.market_cap)
           .slice(0, 10); // Take only top 10 assets
 
