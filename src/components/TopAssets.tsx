@@ -2,17 +2,12 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Asset } from '../types';
 import { formatMarketCap } from '../utils/formatters';
+import { API_ENDPOINTS } from '../utils/api-config';
 
 // Constants for market data
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Constants for commodity calculations
-
-const API_ENDPOINTS = {
-  COINGECKO: 'https://api.coingecko.com/api/v3',
-  FMP: 'https://financialmodelingprep.com/api/v3',
-  METAL_PRICE: 'https://api.metalpriceapi.com/v1',
-};
 
 interface CoinGeckoResponse {
   id: string;

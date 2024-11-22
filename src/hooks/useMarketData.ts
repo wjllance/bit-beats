@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Asset } from '../types';
+import { API_ENDPOINTS } from '../utils/api-config';
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-const API_ENDPOINTS = {
-  COINGECKO: 'https://api.coingecko.com/api/v3',
-};
 
 interface CoinGeckoAsset {
   id: string;

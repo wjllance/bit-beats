@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TimeframeOption, PriceData } from '../types';
+import { API_ENDPOINTS } from '../utils/api-config';
 
-const API_ENDPOINTS = {
-  COINGECKO: 'https://api.coingecko.com/api/v3',
-};
 
 export function usePriceHistory(timeframe: TimeframeOption) {
   const [priceData, setPriceData] = useState<PriceData>({ labels: [], prices: [] });

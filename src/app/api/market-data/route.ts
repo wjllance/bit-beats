@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
+import { API_ENDPOINTS, API_KEYS, STOCK_CACHE_DURATION, COMMODITY_CACHE_DURATION, DISABLE_CACHE } from '@/utils/api-config';
 
 interface MarketData {
   id: string;
@@ -17,9 +18,7 @@ interface CachedData {
   timestamp?: number;
 }
 
-// Cache configuration
-const STOCK_CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
-const COMMODITY_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// Cache state
 let cachedData: CachedData | null = null;
 let lastStockFetchTime: number = 0;
 let lastCommodityFetchTime: number = 0;
@@ -31,18 +30,7 @@ const SILVER_SUPPLY_TONS = 1740000;
 const METRIC_TON_TO_OUNCES = 35274;
 const SAR_TO_USD = 0.2666; // 1 SAR = 0.2666 USD (fixed rate for Saudi Riyal)
 
-const disableCache = process.env.DISABLE_CACHE === 'true';
-
-// API Configuration
-const API_KEYS = {
-  FMP: process.env.NEXT_PUBLIC_FMP_API_KEY || 'demo',
-  METAL_PRICE: process.env.NEXT_PUBLIC_METAL_PRICE_API_KEY || 'demo',
-};
-
-const API_ENDPOINTS = {
-  FMP: 'https://financialmodelingprep.com/api/v3',
-  METAL_PRICE: 'https://api.metalpriceapi.com/v1',
-};
+const disableCache = DISABLE_CACHE;
 
 // Fallback data
 const FALLBACK_DATA: CachedData = {

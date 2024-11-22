@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2024-11-22
+
+### Added
+- Created new `src/utils/api-config.ts` for centralized API configuration
+  - Moved API endpoints and keys
+  - Added cache duration constants
+  - Added feature flags
+
+### Changed
+- Refactored market data route to use shared API configuration
+- Updated TopAssets component to use shared endpoints
+- Improved code organization and maintainability
+
 ## [1.1.4] - 2024-11-22
 
 ### Added
