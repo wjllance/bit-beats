@@ -18,7 +18,7 @@ interface CachedData {
 }
 
 // Cache configuration
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
 let cachedData: CachedData | null = null;
 let lastFetchTime: number = 0;
 
@@ -104,6 +104,8 @@ async function fetchStockData(): Promise<MarketData[]> {
       `${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`,
       { params: { apikey: API_KEYS.FMP } }
     );
+
+    console.log('fetchStockData response', response.data);
     return response.data.map((stock) => ({
       id: stock.symbol,
       name: stock.name,
@@ -150,16 +152,19 @@ async function fetchCommodityData(): Promise<MarketData[]> {
       })
     ]);
 
+    console.log('goldPrice', goldPrice.data);
+    console.log('silverPrice', silverPrice.data);
+
     return [
       {
         id: 'gold',
         name: 'Gold',
         symbol: 'XAU/USD',
-        current_price: goldPrice.data.rates.USDXAU || 0,
-        market_cap: calculateMarketCap(goldPrice.data.rates.USDXAU || 0, GOLD_SUPPLY_TONS),
+        current_price: goldPrice.data.rates?.USDXAU || 0,
+        market_cap: calculateMarketCap(goldPrice.data.rates?.USDXAU || 0, GOLD_SUPPLY_TONS),
         price_change_percentage_24h: calculatePriceChange(
-          goldPrice.data.rates.USDXAU || 0,
-          yesterdayGold.data.rates.USDXAU || 0
+          goldPrice.data.rates?.USDXAU || 0,
+          yesterdayGold.data.rates?.USDXAU || 0
         ),
         type: 'commodity',
       },
@@ -187,6 +192,7 @@ export async function GET() {
   
   // Return cached data if it's still valid
   if (cachedData && currentTime - lastFetchTime < CACHE_DURATION) {
+    console.log('Returning cached data');
     return NextResponse.json(cachedData);
   }
 
