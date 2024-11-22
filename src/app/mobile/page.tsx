@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import MobileBitcoinChart from '../../components/mobile/MobileBitcoinChart';
 import MobileTopAssets from '../../components/mobile/MobileTopAssets';
-import TimeframeSelector, { timeframeOptions } from '../../components/TimeframeSelector';
+import MobileTimeframeSelector from '../../components/mobile/MobileTimeframeSelector';
 import { usePriceHistory } from '../../hooks/usePriceHistory';
 
 const SLOGANS = [
@@ -29,9 +29,9 @@ const formatPrice = (price: number | undefined): string => {
 };
 
 export default function MobilePage() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState(timeframeOptions[0]);
+  const [selectedTimeframe, setSelectedTimeframe] = useState({ label: '24h', days: 1 });
   const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
-  const [currentSlogan, setCurrentSlogan] = useState(0);
+  const [currentSlogan, setCurrentSlogan] = useState(Math.floor(Math.random() * SLOGANS.length));
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Calculate 24h price change
@@ -140,28 +140,19 @@ export default function MobilePage() {
             )}
           </div>
         </div>
-
-        {/* Timeframe Selector */}
-        <div className="px-4 pb-3">
-          <TimeframeSelector
-            selectedTimeframe={selectedTimeframe}
-            onTimeframeChange={setSelectedTimeframe}
-            // className="grid grid-cols-4 gap-2 text-sm"
-            // buttonClassName="py-1.5 font-medium"
-          />
-        </div>
       </div>
 
       {/* Main Content */}
       <div className="space-y-6">
         {/* Chart Section */}
-        <div className="mt-4">
-          <MobileBitcoinChart selectedTimeframe={selectedTimeframe} />
-        </div>
-        
-        {/* Divider */}
-        <div className="px-4">
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
+        <div className="relative">
+          <div className="h-[130px] w-full">
+            <MobileBitcoinChart selectedTimeframe={selectedTimeframe} />
+          </div>
+          <MobileTimeframeSelector
+              selectedTimeframe={selectedTimeframe}
+              onTimeframeChange={setSelectedTimeframe}
+            />
         </div>
         
         {/* Top Assets */}

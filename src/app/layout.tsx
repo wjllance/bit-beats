@@ -2,6 +2,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Orbitron } from 'next/font/google'
 import DeviceRedirect from '../components/DeviceRedirect'
+import GoogleAnalytics from '../components/GoogleAnalytics'
+import { Providers } from '@/components/Providers'
 
 const orbitron = Orbitron({ subsets: ['latin'] })
 
@@ -16,10 +18,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={orbitron.className}>
-        <DeviceRedirect />
-        {children}
+        <GoogleAnalytics />
+        <Providers>
+          <DeviceRedirect>
+            {children}
+          </DeviceRedirect>
+        </Providers>
       </body>
     </html>
   )

@@ -1,22 +1,11 @@
-import { useMarketData } from '../../hooks/useMarketData';
-import clsx from 'clsx';
+'use client';
 
-const formatMarketCap = (marketCap: number): string => {
-  if (marketCap === null || marketCap === undefined) {
-    return '';
-  } else if (marketCap >= 1e12) {
-    return `$${(marketCap / 1e12).toFixed(2)}T`;
-  } else if (marketCap >= 1e9) {
-    return `$${(marketCap / 1e9).toFixed(2)}B`;
-  } else if (marketCap >= 1e6) {
-    return `$${(marketCap / 1e6).toFixed(2)}M`;
-  } else {
-    return `$${marketCap.toLocaleString()}`;
-  }
-};
+import { useMarketDataContext } from '@/context/MarketDataContext';
+import clsx from 'clsx';
+import { formatMarketCap, formatPrice, formatPercentageChange } from '../../utils/formatters';
 
 export default function MobileTopAssets() {
-  const { assets, isLoading, error } = useMarketData();
+  const { marketData: assets, isLoading, error } = useMarketDataContext();
 
   if (error) {
     return (
@@ -30,7 +19,6 @@ export default function MobileTopAssets() {
     <div className="w-full px-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-semibold text-yellow-500/90">Top 10 Market Assets</h2>
-        
       </div>
       
       <div className="space-y-2.5">
@@ -42,7 +30,7 @@ export default function MobileTopAssets() {
             </div>
           </div>
         ) : (
-          assets.map((asset, index) => (
+          assets.slice(0, 10).map((asset, index) => (
             <div
               key={asset.id}
               className="group relative overflow-hidden p-3 bg-gray-800/50 rounded-lg 
@@ -82,7 +70,7 @@ export default function MobileTopAssets() {
                 {/* Right side: Price and Change */}
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-medium text-white">
-                    ${asset.current_price.toLocaleString()}
+                    {formatPrice(asset.current_price)}
                   </span>
                   <div className="flex items-center space-x-1 mt-0.5">
                     <div className={clsx(
@@ -94,7 +82,7 @@ export default function MobileTopAssets() {
                       <span className="mr-0.5">
                         {asset.price_change_percentage_24h >= 0 ? '↑' : '↓'}
                       </span>
-                      {Math.abs(asset.price_change_percentage_24h).toFixed(2)}%
+                      {formatPercentageChange(asset.price_change_percentage_24h)}%
                     </div>
                   </div>
                 </div>

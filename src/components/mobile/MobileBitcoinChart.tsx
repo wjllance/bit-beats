@@ -14,7 +14,6 @@ import {
 } from 'chart.js';
 import { TimeframeOption } from '../../types';
 import { usePriceHistory } from '../../hooks/usePriceHistory';
-import { getMaxTicksLimit } from '../../utils/dateFormatter';
 
 ChartJS.register(
   CategoryScale,
@@ -77,24 +76,30 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
           drawOnChartArea: false,
         },
         ticks: {
-          maxTicksLimit: getMaxTicksLimit(selectedTimeframe.days),
-          color: '#9CA3AF',
-          font: {
-            size: 10,
-          },
+          display: false,
         },
+        border: {
+          display: true,
+          color: 'rgba(156, 163, 175, 0.1)',
+        }
       },
       y: {
         position: 'right' as const,
         grid: {
-          color: 'rgba(75, 85, 99, 0.1)',
+          display: true,
+          color: 'rgba(156, 163, 175, 0.1)',
           drawOnChartArea: false,
+        },
+        border: {
+          display: false,
         },
         ticks: {
           color: '#9CA3AF',
           font: {
             size: 10,
           },
+          padding: 4,
+          count: 4,
           callback: (value: number) =>
             '$' + value.toLocaleString('en-US', {
               minimumFractionDigits: 0,
@@ -111,10 +116,10 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
       {
         data: priceData.prices,
         borderColor: '#F59E0B',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        borderWidth: 1.5,
+        backgroundColor: 'rgba(245, 158, 11, 0.05)',
+        borderWidth: 2,
         fill: true,
-        tension: 0.4,
+        tension: 0.3,
         pointRadius: 0,
         pointHitRadius: 8,
         pointHoverRadius: 4,
@@ -127,7 +132,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-[200px] bg-gray-800/30 rounded-lg mx-4">
+      <div className="flex items-center justify-center h-[140px] bg-gray-800/30 rounded-lg mx-4">
         <div className="flex flex-col items-center space-y-2 p-4 text-center">
           <span className="text-red-400 text-sm">{error}</span>
           <span className="text-gray-400 text-xs">Please try again later</span>
@@ -138,7 +143,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
 
   return (
     <div className="w-full">
-      <div className="relative h-[200px] w-full px-4">
+      <div className="relative h-[130px] w-full px-4">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/30 rounded-lg">
             <div className="flex flex-col items-center space-y-2">

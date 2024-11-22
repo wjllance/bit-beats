@@ -5,7 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2024-01-10
+## [Unreleased]
+
+### Changed
+- Optimized mobile Bitcoin chart for better visual appeal and performance
+  - Reduced chart height to 130px for a more compact display
+  - Improved grid line styling with subtle colors
+  - Removed x-axis labels while maintaining interactive tooltips
+  - Adjusted y-axis grid display for better readability
+- Refined mobile layout and chart positioning
+  - Maintained scrollable content while keeping chart visible
+  - Enhanced overall mobile user experience
+
+## [1.1.5] - 2024-11-22
+
+### Added
+- Created new `src/utils/api-config.ts` for centralized API configuration
+  - Moved API endpoints and keys
+  - Added cache duration constants
+  - Added feature flags
+
+### Changed
+- Refactored market data route to use shared API configuration
+- Updated TopAssets component to use shared endpoints
+- Improved code organization and maintainability
+
+## [1.1.4] - 2024-11-22
+
+### Added
+- Implemented separate cache durations for different data types
+  - Stock data: 1 hour cache
+  - Commodity data: 24 hours cache
+- Added NEXT_PUBLIC_DISABLE_CACHE environment variable for development
+
+### Changed
+- Refactored market data caching mechanism
+- Optimized API calls by fetching only expired data
+- Updated environment variables configuration
+
+## [1.1.3] - 2024-11-22
+
+### Added
+- Created new shared utilities in `src/utils/formatters.ts`
+  - Added formatMarketCap with improved precision (3 decimal places)
+  - Added formatPrice for consistent price formatting
+  - Added formatPercentageChange for standardized percentage displays
+
+### Changed
+- Refactored TopAssets and MobileTopAssets to use shared formatters
+- Improved market cap formatting precision across all components
+- Enhanced code organization by centralizing formatting logic
+
+## [1.1.2] - 2024-11-22
+
+### Added
+- Integrated Google Analytics tracking
+  - Added GoogleAnalytics component using Next.js Script
+  - Implemented tracking code with ID G-GEEM5LH0WW
+  - Optimized loading with afterInteractive strategy
+
+## [1.1.1] - 2024-11-21
 
 ### Added
 - Created new mobile-specific components:
@@ -25,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile layout responsiveness
 - Data fetching and state management in mobile views
 
-## [1.1.0] - 2024-01-10
+## [1.1.0] - 2024-11-21
 
 ### Added
 - Automatic mobile redirection based on screen size
@@ -45,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile navigation and routing edge cases
 - Screen size detection and redirection logic
 
-## [1.0.0] - 2024-01-09
+## [1.0.0] - 2024-11-21
 
 ### Added
 - Initial release of Bitcoin Price Tracker

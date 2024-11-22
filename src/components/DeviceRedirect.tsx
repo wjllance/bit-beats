@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const MOBILE_BREAKPOINT = 768; // Matches Tailwind's md breakpoint
 
-export default function DeviceRedirect() {
+export default function DeviceRedirect({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -31,5 +31,5 @@ export default function DeviceRedirect() {
     return () => window.removeEventListener('resize', handleResize);
   }, [pathname, router]);
 
-  return null;
+  return <>{children}</>;
 }
