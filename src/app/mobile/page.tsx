@@ -31,7 +31,7 @@ const formatPrice = (price: number | undefined): string => {
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState(timeframeOptions[0]);
   const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
-  const [currentSlogan, setCurrentSlogan] = useState(0);
+  const [currentSlogan, setCurrentSlogan] = useState(Math.floor(Math.random() * SLOGANS.length));
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Calculate 24h price change
