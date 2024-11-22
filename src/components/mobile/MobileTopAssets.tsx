@@ -1,9 +1,11 @@
-import { useMarketData } from '../../hooks/useMarketData';
+'use client';
+
+import { useMarketDataContext } from '@/context/MarketDataContext';
 import clsx from 'clsx';
 import { formatMarketCap, formatPrice, formatPercentageChange } from '../../utils/formatters';
 
 export default function MobileTopAssets() {
-  const { assets, isLoading, error } = useMarketData();
+  const { marketData: assets, isLoading, error } = useMarketDataContext();
 
   if (error) {
     return (
@@ -17,7 +19,6 @@ export default function MobileTopAssets() {
     <div className="w-full px-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-semibold text-yellow-500/90">Top 10 Market Assets</h2>
-        
       </div>
       
       <div className="space-y-2.5">
@@ -29,7 +30,7 @@ export default function MobileTopAssets() {
             </div>
           </div>
         ) : (
-          assets.map((asset, index) => (
+          assets.slice(0, 10).map((asset, index) => (
             <div
               key={asset.id}
               className="group relative overflow-hidden p-3 bg-gray-800/50 rounded-lg 
@@ -88,7 +89,7 @@ export default function MobileTopAssets() {
               </div>
             </div>
           ))
-        )} 
+        )}
       </div>
     </div>
   );
