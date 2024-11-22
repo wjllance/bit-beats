@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2024-01-10
+
+### Added
+- Created new mobile-specific components:
+  - MobileBitcoinChart for optimized chart display
+  - MobileTopAssets for responsive asset listing
+- Added useMarketData custom hook for centralized data management
+- New mobile page layout with optimized UI components
+
+### Changed
+- Restructured mobile components directory
+- Improved mobile navigation flow
+- Enhanced mobile-first design approach
+- Optimized data fetching for mobile views
+
+### Fixed
+- Mobile component import paths
+- Mobile layout responsiveness
+- Data fetching and state management in mobile views
+
 ## [1.1.0] - 2024-01-10
 
 ### Added
