@@ -27,6 +27,7 @@ const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'TSM', 
 const GOLD_SUPPLY_TONS = 205000;
 const SILVER_SUPPLY_TONS = 1740000;
 const METRIC_TON_TO_OUNCES = 35274;
+const SAR_TO_USD = 0.2666; // 1 SAR = 0.2666 USD (fixed rate for Saudi Riyal)
 
 // API Configuration
 const API_KEYS = {
@@ -107,15 +108,21 @@ async function fetchStockData(): Promise<MarketData[]> {
     );
 
     console.log('fetchStockData response', response.data);
-    return response.data.map((stock) => ({
-      id: stock.symbol,
-      name: stock.name,
-      symbol: stock.symbol,
-      current_price: stock.price,
-      price_change_percentage_24h: stock.changesPercentage,
-      market_cap: stock.marketCap,
-      type: 'stock',
-    }));
+    return response.data.map((stock) => {
+      // Convert price to USD if the stock is from Saudi exchange
+      const price = stock.symbol.endsWith('.SR') ? stock.price * SAR_TO_USD : stock.price;
+      const marketCap = stock.symbol.endsWith('.SR') ? stock.marketCap * SAR_TO_USD : stock.marketCap;
+
+      return {
+        id: stock.symbol,
+        name: stock.name,
+        symbol: stock.symbol,
+        current_price: price,
+        price_change_percentage_24h: stock.changesPercentage,
+        market_cap: marketCap,
+        type: 'stock',
+      };
+    });
   } catch (error) {
     console.error('Error fetching stock data:', error);
     return FALLBACK_DATA.stocks;
