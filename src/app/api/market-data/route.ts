@@ -18,9 +18,11 @@ interface CachedData {
 }
 
 // Cache configuration
-const CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hours in milliseconds
+const STOCK_CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+const COMMODITY_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 let cachedData: CachedData | null = null;
-let lastFetchTime: number = 0;
+let lastStockFetchTime: number = 0;
+let lastCommodityFetchTime: number = 0;
 
 // Constants
 const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'TSM', 'META', 'BRK.B', 'JPM', 'UNH', '2222.SR'];
@@ -109,7 +111,7 @@ async function fetchStockData(): Promise<MarketData[]> {
       { params: { apikey: API_KEYS.FMP } }
     );
 
-    console.log('fetchStockData response', response.data);
+    console.log('fetchStockData response', JSON.stringify(response.data));
     return response.data.map((stock) => {
       // Convert price to USD if the stock is from Saudi exchange
       const price = stock.symbol.endsWith('.SR') ? stock.price * SAR_TO_USD : stock.price;
@@ -203,22 +205,54 @@ async function fetchCommodityData(): Promise<MarketData[]> {
 export async function GET() {
   const currentTime = Date.now();
   
-  // Return cached data if it's still valid
-  if (cachedData && currentTime - lastFetchTime < CACHE_DURATION && !disableCache) {
-    console.log('Returning cached data');
-    return NextResponse.json(cachedData);
-  }
+  let stocks: MarketData[] = [];
+  let commodities: MarketData[] = [];
+
+  // Check if we need to fetch new stock data
+  const needNewStockData = !cachedData?.stocks || 
+    currentTime - lastStockFetchTime > STOCK_CACHE_DURATION || 
+    disableCache;
+
+  // Check if we need to fetch new commodity data
+  const needNewCommodityData = !cachedData?.commodities || 
+    currentTime - lastCommodityFetchTime > COMMODITY_CACHE_DURATION || 
+    disableCache;
+
+  console.log('needNewStockData', needNewStockData);  
+  console.log('needNewCommodityData', needNewCommodityData);
 
   try {
-    // Fetch new data
-    const [stocks, commodities] = await Promise.all([
-      fetchStockData(),
-      fetchCommodityData(),
-    ]);
+    // Use cached data or fetch new data as needed
+    if (needNewStockData && needNewCommodityData) {
+      // Fetch both if needed
+      [stocks, commodities] = await Promise.all([
+        fetchStockData(),
+        fetchCommodityData(),
+      ]);
+      lastStockFetchTime = currentTime;
+      lastCommodityFetchTime = currentTime;
+    } else if (needNewStockData) {
+      // Only fetch stocks if needed
+      stocks = await fetchStockData();
+      commodities = cachedData?.commodities || [];
+      lastStockFetchTime = currentTime;
+    } else if (needNewCommodityData) {
+      // Only fetch commodities if needed
+      commodities = await fetchCommodityData();
+      stocks = cachedData?.stocks || [];
+      lastCommodityFetchTime = currentTime;
+    } else {
+      // Use all cached data
+      stocks = cachedData?.stocks || [];
+      commodities = cachedData?.commodities || [];
+    }
 
     // Update cache
-    cachedData = { stocks, commodities, timestamp: currentTime };
-    lastFetchTime = currentTime;
+    cachedData = { 
+      stocks, 
+      commodities, 
+      timestamp: currentTime 
+    };
 
     return NextResponse.json(cachedData);
   } catch (error) {

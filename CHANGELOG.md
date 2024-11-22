@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2024-11-22
+
+### Added
+- Implemented separate cache durations for different data types
+  - Stock data: 1 hour cache
+  - Commodity data: 24 hours cache
+- Added NEXT_PUBLIC_DISABLE_CACHE environment variable for development
+
+### Changed
+- Refactored market data caching mechanism
+- Optimized API calls by fetching only expired data
+- Updated environment variables configuration
+
 ## [1.1.3] - 2024-11-22
 
 ### Added
