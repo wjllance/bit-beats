@@ -36,5 +36,5 @@ export const formatPrice = (price: number): string => {
  */
 export const formatPercentageChange = (percentage: number): string => {
   const sign = percentage >= 0 ? '+' : '';
-  return `${sign}${percentage.toFixed(2)}%`;
+  return `${sign}${percentage.toFixed(2)}`;
 };
