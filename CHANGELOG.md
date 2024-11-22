@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2024-01-10
+## [1.1.2] - 2024-11-22
+
+### Added
+- Integrated Google Analytics tracking
+  - Added GoogleAnalytics component using Next.js Script
+  - Implemented tracking code with ID G-GEEM5LH0WW
+  - Optimized loading with afterInteractive strategy
+
+## [1.1.1] - 2024-11-21
 
 ### Added
 - Created new mobile-specific components:
@@ -25,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile layout responsiveness
 - Data fetching and state management in mobile views
 
-## [1.1.0] - 2024-01-10
+## [1.1.0] - 2024-11-21
 
 ### Added
 - Automatic mobile redirection based on screen size
@@ -45,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile navigation and routing edge cases
 - Screen size detection and redirection logic
 
-## [1.0.0] - 2024-01-09
+## [1.0.0] - 2024-11-21
 
 ### Added
 - Initial release of Bitcoin Price Tracker
