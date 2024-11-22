@@ -144,7 +144,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
 
   return (
     <div className="w-full">
-      <div className="relative h-[160px] w-full px-4">
+      <div className="relative h-[130px] w-full px-4">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/30 rounded-lg">
             <div className="flex flex-col items-center space-y-2">

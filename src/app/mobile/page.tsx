@@ -146,14 +146,13 @@ export default function MobilePage() {
       <div className="space-y-6">
         {/* Chart Section */}
         <div className="relative">
-        <MobileTimeframeSelector
-            selectedTimeframe={selectedTimeframe}
-            onTimeframeChange={setSelectedTimeframe}
-          />
-          <div className="h-[160px] w-full">
+          <div className="h-[130px] w-full">
             <MobileBitcoinChart selectedTimeframe={selectedTimeframe} />
           </div>
-          
+          <MobileTimeframeSelector
+              selectedTimeframe={selectedTimeframe}
+              onTimeframeChange={setSelectedTimeframe}
+            />
         </div>
         
         {/* Top Assets */}
