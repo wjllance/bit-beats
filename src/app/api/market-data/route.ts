@@ -29,6 +29,8 @@ const SILVER_SUPPLY_TONS = 1740000;
 const METRIC_TON_TO_OUNCES = 35274;
 const SAR_TO_USD = 0.2666; // 1 SAR = 0.2666 USD (fixed rate for Saudi Riyal)
 
+const disableCache = process.env.DISABLE_CACHE === 'true';
+
 // API Configuration
 const API_KEYS = {
   FMP: process.env.NEXT_PUBLIC_FMP_API_KEY || 'demo',
@@ -202,7 +204,7 @@ export async function GET() {
   const currentTime = Date.now();
   
   // Return cached data if it's still valid
-  if (cachedData && currentTime - lastFetchTime < CACHE_DURATION) {
+  if (cachedData && currentTime - lastFetchTime < CACHE_DURATION && !disableCache) {
     console.log('Returning cached data');
     return NextResponse.json(cachedData);
   }
