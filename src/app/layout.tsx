@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Orbitron } from 'next/font/google'
 import DeviceRedirect from '../components/DeviceRedirect'
+import GoogleAnalytics from '../components/GoogleAnalytics'
 
 const orbitron = Orbitron({ subsets: ['latin'] })
 
@@ -17,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={orbitron.className}>
         <DeviceRedirect />
         {children}
