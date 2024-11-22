@@ -18,7 +18,7 @@ interface CachedData {
 }
 
 // Cache configuration
-const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+const CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hours in milliseconds
 let cachedData: CachedData | null = null;
 let lastFetchTime: number = 0;
 
