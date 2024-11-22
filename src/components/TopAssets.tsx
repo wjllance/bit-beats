@@ -1,31 +1,18 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Asset } from '../types';
+import { formatMarketCap } from '../utils/formatters';
 
 // Constants for market data
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Constants for commodity calculations
 
-const formatMarketCap = (marketCap: number): string => {
-  if (marketCap >= 1e12) {
-    return `$${(marketCap / 1e12).toFixed(2)}T`;
-  } else if (marketCap >= 1e9) {
-    return `$${(marketCap / 1e9).toFixed(2)}B`;
-  } else if (marketCap >= 1e6) {
-    return `$${(marketCap / 1e6).toFixed(2)}M`;
-  } else {
-    return `$${marketCap.toLocaleString()}`;
-  }
-};
-
-
 const API_ENDPOINTS = {
   COINGECKO: 'https://api.coingecko.com/api/v3',
   FMP: 'https://financialmodelingprep.com/api/v3',
   METAL_PRICE: 'https://api.metalpriceapi.com/v1',
 };
-
 
 interface CoinGeckoResponse {
   id: string;
@@ -53,7 +40,6 @@ export default function TopAssets({ position }: TopAssetsProps): JSX.Element {
     value: 'market_cap',
     direction: 'desc'
   });
-
 
   useEffect(() => {
     const fetchAllData = async () => {
