@@ -92,6 +92,7 @@ interface StockResponse {
 }
 
 interface MetalPriceResponse {
+  success?: boolean;
   rates: {
     USDXAU?: number;
     USDXAG?: number;
@@ -155,31 +156,34 @@ async function fetchCommodityData(): Promise<MarketData[]> {
     console.log('goldPrice', goldPrice.data);
     console.log('silverPrice', silverPrice.data);
 
+    const goldData: MarketData = goldPrice.data?.success ?{
+      id: 'gold',
+      name: 'Gold',
+      symbol: 'XAU/USD',
+      current_price: goldPrice.data.rates?.USDXAU || 0,
+      market_cap: calculateMarketCap(goldPrice.data.rates?.USDXAU || 0, GOLD_SUPPLY_TONS),
+      price_change_percentage_24h: calculatePriceChange(
+        goldPrice.data.rates?.USDXAU || 0,
+        yesterdayGold.data.rates?.USDXAU || 0
+      ),
+      type: 'commodity',
+    }: FALLBACK_DATA.commodities[0];
+    const silverData: MarketData = silverPrice.data?.success ?{
+      id: 'silver',
+      name: 'Silver',
+      symbol: 'XAG/USD',
+      current_price: silverPrice.data.rates?.USDXAG || 0,
+      market_cap: calculateMarketCap(silverPrice.data.rates?.USDXAG || 0, SILVER_SUPPLY_TONS),
+      price_change_percentage_24h: calculatePriceChange(
+        silverPrice.data.rates?.USDXAG || 0,
+        yesterdaySilver.data.rates?.USDXAG || 0
+      ),
+      type: 'commodity',
+    }: FALLBACK_DATA.commodities[1]; 
+
     return [
-      {
-        id: 'gold',
-        name: 'Gold',
-        symbol: 'XAU/USD',
-        current_price: goldPrice.data.rates?.USDXAU || 0,
-        market_cap: calculateMarketCap(goldPrice.data.rates?.USDXAU || 0, GOLD_SUPPLY_TONS),
-        price_change_percentage_24h: calculatePriceChange(
-          goldPrice.data.rates?.USDXAU || 0,
-          yesterdayGold.data.rates?.USDXAU || 0
-        ),
-        type: 'commodity',
-      },
-      {
-        id: 'silver',
-        name: 'Silver',
-        symbol: 'XAG/USD',
-        current_price: silverPrice.data.rates.USDXAG || 0,
-        market_cap: calculateMarketCap(silverPrice.data.rates.USDXAG || 0, SILVER_SUPPLY_TONS),
-        price_change_percentage_24h: calculatePriceChange(
-          silverPrice.data.rates.USDXAG || 0,
-          yesterdaySilver.data.rates.USDXAG || 0
-        ),
-        type: 'commodity',
-      }
+      goldData,
+      silverData
     ];
   } catch (error) {
     console.error('Error fetching commodity data:', error);
