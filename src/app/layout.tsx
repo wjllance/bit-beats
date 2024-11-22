@@ -8,7 +8,7 @@ import { Providers } from '@/components/Providers'
 const orbitron = Orbitron({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'BTC Beats - Bitcoin Price Tracker',
+  title: 'Bit Beats - Bitcoin Will Beat Everything',
   description: 'Watch Bitcoin beat other assets in real-time with market tracking and visualization',
 }
 

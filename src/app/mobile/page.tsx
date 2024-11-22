@@ -67,7 +67,7 @@ export default function MobilePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text tracking-tight">
-                  BTC Beats
+                  Bit Beats
                 </h1>
               </div>
             </div>
