@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Optimized mobile Bitcoin chart for better visual appeal and performance
+  - Reduced chart height to 130px for a more compact display
+  - Improved grid line styling with subtle colors
+  - Removed x-axis labels while maintaining interactive tooltips
+  - Adjusted y-axis grid display for better readability
+- Refined mobile layout and chart positioning
+  - Maintained scrollable content while keeping chart visible
+  - Enhanced overall mobile user experience
+
 ## [1.1.5] - 2024-11-22
 
 ### Added

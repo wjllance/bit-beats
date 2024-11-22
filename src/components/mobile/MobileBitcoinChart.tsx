@@ -14,7 +14,6 @@ import {
 } from 'chart.js';
 import { TimeframeOption } from '../../types';
 import { usePriceHistory } from '../../hooks/usePriceHistory';
-import { getMaxTicksLimit } from '../../utils/dateFormatter';
 
 ChartJS.register(
   CategoryScale,
@@ -89,7 +88,7 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
         grid: {
           display: true,
           color: 'rgba(156, 163, 175, 0.1)',
-          drawBorder: false,
+          drawOnChartArea: false,
         },
         border: {
           display: false,
