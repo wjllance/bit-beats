@@ -37,10 +37,15 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeframe, setTimeframe] = useState<TimeframeOption>({
+  const [timeframe, setTimeframeState] = useState<TimeframeOption>({
     label: "24H",
     days: 1,
   });
+
+  const setTimeframe = (newTimeframe: TimeframeOption) => {
+    setError(null); // Reset error when timeframe changes
+    setTimeframeState(newTimeframe);
+  };
 
   const cacheRef = useRef<Record<number, CacheEntry>>({});
 

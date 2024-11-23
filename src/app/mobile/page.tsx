@@ -28,6 +28,28 @@ const formatPrice = (price: number | undefined): string => {
   });
 };
 
+const formatDateTime = (dateStr: string): { time: string; date: string } => {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    return {
+      time: "Invalid time",
+      date: "Invalid date",
+    };
+  }
+  // Force current year
+  const currentYear = new Date().getFullYear();
+  date.setFullYear(currentYear);
+
+  return {
+    time: date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }),
+    date: date.toLocaleDateString("en-US"),
+  };
+};
+
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState({
     label: "24h",
@@ -148,11 +170,18 @@ export default function MobilePage() {
                 <div className="flex items-center justify-end gap-1 text-[10px] text-gray-500">
                   Updated time:
                   {priceData.labels && priceData.labels.length > 0 ? (
-                    <>
-                      <span>{new Date(priceData.labels[priceData.labels.length - 1]).toLocaleTimeString()}</span>
-                      <span>•</span>
-                      <span>{new Date(priceData.labels[priceData.labels.length - 1]).toLocaleDateString()}</span>
-                    </>
+                    (() => {
+                      const { time, date } = formatDateTime(
+                        priceData.labels[priceData.labels.length - 1]
+                      );
+                      return (
+                        <>
+                          <span>{time}</span>
+                          <span>•</span>
+                          <span>{date}</span>
+                        </>
+                      );
+                    })()
                   ) : (
                     <span>Loading...</span>
                   )}
