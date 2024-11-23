@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added version display in application footer
   - Shows current version from package.json
   - Updates automatically with git tags
+  - update
 
 ### Changed
 
