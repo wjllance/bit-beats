@@ -40,7 +40,7 @@ jobs:
       - name: Merge main into target branch
         run: |
           git checkout ${{ env.TARGET_BRANCH }}
-          git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
+          git pull origin main --rebase
 
       - name: Update package.json version
         run: |
