@@ -146,13 +146,7 @@ export default function MobilePage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-1 text-[10px] text-gray-500">
-                  <svg
-                    className="w-3 h-3"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6l5.25 3.15.75-1.23-4-2.37V7z" />
-                  </svg>
+                  Updated time:
                   <span>{new Date().toLocaleTimeString()}</span>
                   <span>•</span>
                   <span>{new Date().toLocaleDateString()}</span>
