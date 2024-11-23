@@ -21,7 +21,10 @@ interface PriceData {
 // Cache key prefix
 const PRICE_HISTORY_CACHE_KEY = "price_history";
 
-async function fetchPriceHistory(days: number, interval?: string): Promise<PriceData> {
+async function fetchPriceHistory(
+  days: number,
+  interval?: string
+): Promise<PriceData> {
   try {
     const response = await axios.get(
       `${API_ENDPOINTS.COINGECKO}/coins/bitcoin/market_chart`,
@@ -60,7 +63,9 @@ export async function GET(request: Request) {
     const interval = searchParams.get("interval") || undefined;
 
     // Create a unique cache key based on parameters
-    const cacheKey = `${PRICE_HISTORY_CACHE_KEY}:${days}:${interval || "default"}`;
+    const cacheKey = `${PRICE_HISTORY_CACHE_KEY}:${days}:${
+      interval || "default"
+    }`;
 
     if (!DISABLE_CACHE) {
       // Try to get data from Redis cache
@@ -73,12 +78,14 @@ export async function GET(request: Request) {
         lastUpdate &&
         now - lastUpdate < PRICE_HISTORY_CACHE_DURATION
       ) {
+        console.log("Returning cached data");
         return NextResponse.json(cachedData);
       }
     }
 
     // Fetch fresh data
     const priceData = await fetchPriceHistory(days, interval);
+    console.log("Fetched fresh data");
 
     if (!DISABLE_CACHE) {
       // Update cache
