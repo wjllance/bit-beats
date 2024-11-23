@@ -12,8 +12,8 @@ export const formatDate = (timestamp: number, days: number): string => {
 };
 
 export const getMaxTicksLimit = (days: number): number => {
-  if (days <= 1) return 24;
-  if (days <= 7) return 7;
-  if (days <= 30) return 15;
-  return 12;
+  if (days <= 1) return 12; // Reduced from 24 to show every 2 hours
+  if (days <= 7) return 7;  // One label per day for week view
+  if (days <= 30) return 10; // Reduced from 15 for month view
+  return 8; // Reduced from 12 for longer periods
 };

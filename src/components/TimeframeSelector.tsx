@@ -18,16 +18,18 @@ export default function TimeframeSelector({
   onTimeframeChange,
 }: TimeframeSelectorProps) {
   return (
-    <div className="timeframe-container">
+    <div className="inline-flex bg-gray-900/50 rounded-lg p-1 gap-1">
       {timeframeOptions.map((timeframe) => (
         <button
           key={timeframe.label}
           onClick={() => onTimeframeChange(timeframe)}
-          className={`timeframe-button ${
-            timeframe.label === selectedTimeframe?.label ? 'active' : ''
+          className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
+            timeframe.label === selectedTimeframe?.label
+              ? 'bg-yellow-500 text-gray-900 shadow-lg'
+              : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
           }`}
         >
-          {timeframe.label}
+          {timeframe.label.toUpperCase()}
         </button>
       ))}
     </div>

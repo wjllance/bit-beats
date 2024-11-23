@@ -1,60 +1,27 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { PriceData, TimeframeOption } from '../types';
-import { formatDate } from '../utils/dateFormatter';
-import TimeframeSelector from '../components/TimeframeSelector';
-import PriceDisplay from '../components/PriceDisplay';
-import BitcoinChart from '../components/BitcoinChart';
-import TopAssets from '../components/TopAssets';
+import { useState } from "react";
+import { TimeframeOption } from "@/types";
+import BitcoinChart from "@/components/BitcoinChart";
+import TimeframeSelector from "@/components/TimeframeSelector";
+import PriceDisplay from "@/components/PriceDisplay";
+import TopAssets from "@/components/TopAssets";
+import { usePriceHistory } from "@/hooks/usePriceHistory";
 
 export default function BitcoinPriceTracker() {
-  const [priceData, setPriceData] = useState<PriceData>({
-    labels: [],
-    prices: [],
+  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({
+    label: "24h",
+    days: 1,
   });
-  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({ label: '24h', days: 1 });
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBitcoinPrices = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(
-          `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${selectedTimeframe.days}`
-        );
-
-        const prices = response.data.prices;
-        const labels = prices.map((price: [number, number]) => 
-          formatDate(price[0], selectedTimeframe.days)
-        );
-        const priceValues = prices.map((price: [number, number]) => price[1]);
-
-        setPriceData({
-          labels,
-          prices: priceValues,
-        });
-        setCurrentPrice(priceValues[priceValues.length - 1]);
-      } catch (error) {
-        console.error('Error fetching Bitcoin prices:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBitcoinPrices();
-    const interval = setInterval(fetchBitcoinPrices, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [selectedTimeframe]);
+  const { priceData, isLoading } = usePriceHistory(selectedTimeframe);
+  const currentPrice = priceData.prices[priceData.prices.length - 1] || null;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <PriceDisplay currentPrice={currentPrice} priceData={priceData} />
-        
+
         <div className="grid grid-cols-12 gap-6">
           {/* Left side assets */}
           <div className="col-span-3">
@@ -66,7 +33,15 @@ export default function BitcoinPriceTracker() {
           {/* Center chart */}
           <div className="col-span-6">
             <div className="bg-gray-800/50 rounded-lg p-6">
-              <div className="mb-4">
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="flex items-center justify-between w-full">
+                  <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
+                  {isLoading && (
+                    <span className="text-sm text-gray-400 animate-pulse">
+                      Updating...
+                    </span>
+                  )}
+                </div>
                 <TimeframeSelector
                   selectedTimeframe={selectedTimeframe}
                   onTimeframeChange={setSelectedTimeframe}
@@ -75,7 +50,6 @@ export default function BitcoinPriceTracker() {
               <BitcoinChart
                 priceData={priceData}
                 selectedTimeframe={selectedTimeframe}
-                isLoading={isLoading}
               />
             </div>
           </div>

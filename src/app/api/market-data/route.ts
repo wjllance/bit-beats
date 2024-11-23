@@ -1,6 +1,14 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
-import { API_ENDPOINTS, API_KEYS, STOCK_CACHE_DURATION, COMMODITY_CACHE_DURATION, DISABLE_CACHE } from '@/utils/api-config';
+import { NextResponse } from "next/server";
+import axios from "axios";
+import { Redis } from "@upstash/redis";
+import {
+  API_ENDPOINTS,
+  API_KEYS,
+  STOCK_CACHE_DURATION,
+  COMMODITY_CACHE_DURATION,
+  CRYPTO_CACHE_DURATION,
+  DISABLE_CACHE,
+} from "@/utils/api-config";
 
 interface MarketData {
   id: string;
@@ -9,22 +17,31 @@ interface MarketData {
   current_price: number;
   price_change_percentage_24h: number;
   market_cap: number;
-  type: 'crypto' | 'stock' | 'commodity';
+  type: "crypto" | "stock" | "commodity";
 }
 
 interface CachedData {
   stocks: MarketData[];
   commodities: MarketData[];
+  crypto: MarketData[];
   timestamp?: number;
 }
 
-// Cache state
-let cachedData: CachedData | null = null;
-let lastStockFetchTime: number = 0;
-let lastCommodityFetchTime: number = 0;
-
 // Constants
-const POPULAR_STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'TSM', 'META', 'BRK.B', 'JPM', 'UNH', '2222.SR'];
+const POPULAR_STOCKS = [
+  "AAPL",
+  "MSFT",
+  "GOOGL",
+  "AMZN",
+  "NVDA",
+  "TSLA",
+  "TSM",
+  "META",
+  "BRK.B",
+  "JPM",
+  "UNH",
+  "2222.SR",
+];
 const GOLD_SUPPLY_TONS = 205000;
 const SILVER_SUPPLY_TONS = 1740000;
 const METRIC_TON_TO_OUNCES = 35274;
@@ -32,48 +49,60 @@ const SAR_TO_USD = 0.2666; // 1 SAR = 0.2666 USD (fixed rate for Saudi Riyal)
 
 const disableCache = DISABLE_CACHE;
 
+// Redis client initialization
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
+
+// Cache keys
+const STOCKS_CACHE_KEY = "market_data:stocks";
+const COMMODITIES_CACHE_KEY = "market_data:commodities";
+const CRYPTO_CACHE_KEY = "market_data:crypto";
+
 // Fallback data
 const FALLBACK_DATA: CachedData = {
   stocks: [
     {
-      id: 'AAPL',
-      name: 'Apple Inc.',
-      symbol: 'AAPL',
-      current_price: 169.90,
+      id: "AAPL",
+      name: "Apple Inc.",
+      symbol: "AAPL",
+      current_price: 169.9,
       price_change_percentage_24h: 0.85,
       market_cap: 2650000000000,
-      type: 'stock',
+      type: "stock",
     },
     {
-      id: 'MSFT',
-      name: 'Microsoft Corporation',
-      symbol: 'MSFT',
+      id: "MSFT",
+      name: "Microsoft Corporation",
+      symbol: "MSFT",
       current_price: 425.22,
       price_change_percentage_24h: 1.25,
       market_cap: 3160000000000,
-      type: 'stock',
+      type: "stock",
     },
   ],
   commodities: [
     {
-      id: 'gold',
-      name: 'Gold',
-      symbol: 'XAU/USD',
-      current_price: 2619.50,
+      id: "gold",
+      name: "Gold",
+      symbol: "XAU/USD",
+      current_price: 2619.5,
       price_change_percentage_24h: 0.35,
       market_cap: 17500000000000,
-      type: 'commodity',
+      type: "commodity",
     },
     {
-      id: 'silver',
-      name: 'Silver',
-      symbol: 'XAG/USD',
+      id: "silver",
+      name: "Silver",
+      symbol: "XAG/USD",
       current_price: 30.88,
       price_change_percentage_24h: -0.42,
       market_cap: 1730000000000,
-      type: 'commodity',
+      type: "commodity",
     },
   ],
+  crypto: [],
 };
 
 interface StockResponse {
@@ -92,18 +121,31 @@ interface MetalPriceResponse {
   };
 }
 
+interface CoinGeckoResponse {
+  id: string;
+  name: string;
+  symbol: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
+}
+
 async function fetchStockData(): Promise<MarketData[]> {
   try {
     const response = await axios.get<StockResponse[]>(
-      `${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(',')}`,
+      `${API_ENDPOINTS.FMP}/quote/${POPULAR_STOCKS.join(",")}`,
       { params: { apikey: API_KEYS.FMP } }
     );
 
-    console.log('fetchStockData response', JSON.stringify(response.data));
+    console.log("fetchStockData response", JSON.stringify(response.data));
     return response.data.map((stock) => {
       // Convert price to USD if the stock is from Saudi exchange
-      const price = stock.symbol.endsWith('.SR') ? stock.price * SAR_TO_USD : stock.price;
-      const marketCap = stock.symbol.endsWith('.SR') ? stock.marketCap * SAR_TO_USD : stock.marketCap;
+      const price = stock.symbol.endsWith(".SR")
+        ? stock.price * SAR_TO_USD
+        : stock.price;
+      const marketCap = stock.symbol.endsWith(".SR")
+        ? stock.marketCap * SAR_TO_USD
+        : stock.marketCap;
 
       return {
         id: stock.symbol,
@@ -112,11 +154,11 @@ async function fetchStockData(): Promise<MarketData[]> {
         current_price: price,
         price_change_percentage_24h: stock.changesPercentage,
         market_cap: marketCap,
-        type: 'stock',
+        type: "stock",
       };
     });
   } catch (error) {
-    console.error('Error fetching stock data:', error);
+    console.error("Error fetching stock data:", error);
     return FALLBACK_DATA.stocks;
   }
 }
@@ -127,125 +169,198 @@ async function fetchCommodityData(): Promise<MarketData[]> {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+    const formatDate = (date: Date): string => date.toISOString().split("T")[0];
 
-    const calculateMarketCap = (pricePerOunce: number, supplyTons: number): number => {
+    const calculateMarketCap = (
+      pricePerOunce: number,
+      supplyTons: number
+    ): number => {
       return pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
     };
 
-    const calculatePriceChange = (currentPrice: number, previousPrice: number): number => {
+    const calculatePriceChange = (
+      currentPrice: number,
+      previousPrice: number
+    ): number => {
       return ((currentPrice - previousPrice) / previousPrice) * 100;
     };
 
-    const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] = await Promise.all([
-      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-        params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAU' }
-      }),
-      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-        params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAG' }
-      }),
-      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-        params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAU' }
-      }),
-      axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`, {
-        params: { api_key: API_KEYS.METAL_PRICE, currencies: 'XAG' }
-      })
-    ]);
+    const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] =
+      await Promise.all([
+        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
+        }),
+        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
+          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
+        }),
+        axios.get<MetalPriceResponse>(
+          `${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`,
+          {
+            params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
+          }
+        ),
+        axios.get<MetalPriceResponse>(
+          `${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`,
+          {
+            params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
+          }
+        ),
+      ]);
 
-    console.log('goldPrice', goldPrice.data);
-    console.log('silverPrice', silverPrice.data);
+    console.log("goldPrice", goldPrice.data);
+    console.log("silverPrice", silverPrice.data);
 
-    const goldData: MarketData = goldPrice.data?.success ?{
-      id: 'gold',
-      name: 'Gold',
-      symbol: 'XAU/USD',
-      current_price: goldPrice.data.rates?.USDXAU || 0,
-      market_cap: calculateMarketCap(goldPrice.data.rates?.USDXAU || 0, GOLD_SUPPLY_TONS),
-      price_change_percentage_24h: calculatePriceChange(
-        goldPrice.data.rates?.USDXAU || 0,
-        yesterdayGold.data.rates?.USDXAU || 0
-      ),
-      type: 'commodity',
-    }: FALLBACK_DATA.commodities[0];
-    const silverData: MarketData = silverPrice.data?.success ?{
-      id: 'silver',
-      name: 'Silver',
-      symbol: 'XAG/USD',
-      current_price: silverPrice.data.rates?.USDXAG || 0,
-      market_cap: calculateMarketCap(silverPrice.data.rates?.USDXAG || 0, SILVER_SUPPLY_TONS),
-      price_change_percentage_24h: calculatePriceChange(
-        silverPrice.data.rates?.USDXAG || 0,
-        yesterdaySilver.data.rates?.USDXAG || 0
-      ),
-      type: 'commodity',
-    }: FALLBACK_DATA.commodities[1]; 
+    const goldData: MarketData = goldPrice.data?.success
+      ? {
+          id: "gold",
+          name: "Gold",
+          symbol: "XAU/USD",
+          current_price: goldPrice.data.rates?.USDXAU || 0,
+          market_cap: calculateMarketCap(
+            goldPrice.data.rates?.USDXAU || 0,
+            GOLD_SUPPLY_TONS
+          ),
+          price_change_percentage_24h: calculatePriceChange(
+            goldPrice.data.rates?.USDXAU || 0,
+            yesterdayGold.data.rates?.USDXAU || 0
+          ),
+          type: "commodity",
+        }
+      : FALLBACK_DATA.commodities[0];
+    const silverData: MarketData = silverPrice.data?.success
+      ? {
+          id: "silver",
+          name: "Silver",
+          symbol: "XAG/USD",
+          current_price: silverPrice.data.rates?.USDXAG || 0,
+          market_cap: calculateMarketCap(
+            silverPrice.data.rates?.USDXAG || 0,
+            SILVER_SUPPLY_TONS
+          ),
+          price_change_percentage_24h: calculatePriceChange(
+            silverPrice.data.rates?.USDXAG || 0,
+            yesterdaySilver.data.rates?.USDXAG || 0
+          ),
+          type: "commodity",
+        }
+      : FALLBACK_DATA.commodities[1];
 
-    return [
-      goldData,
-      silverData
-    ];
+    return [goldData, silverData];
   } catch (error) {
-    console.error('Error fetching commodity data:', error);
+    console.error("Error fetching commodity data:", error);
     return FALLBACK_DATA.commodities;
   }
 }
 
-export async function GET() {
-  const currentTime = Date.now();
-  
-  let stocks: MarketData[] = [];
-  let commodities: MarketData[] = [];
-
-  // Check if we need to fetch new stock data
-  const needNewStockData = !cachedData?.stocks || 
-    currentTime - lastStockFetchTime > STOCK_CACHE_DURATION || 
-    disableCache;
-
-  // Check if we need to fetch new commodity data
-  const needNewCommodityData = !cachedData?.commodities || 
-    currentTime - lastCommodityFetchTime > COMMODITY_CACHE_DURATION || 
-    disableCache;
-
-  console.log('needNewStockData', needNewStockData);  
-  console.log('needNewCommodityData', needNewCommodityData);
-
+async function fetchCryptoData(): Promise<MarketData[]> {
   try {
-    // Use cached data or fetch new data as needed
-    if (needNewStockData && needNewCommodityData) {
-      // Fetch both if needed
-      [stocks, commodities] = await Promise.all([
+    const response = await axios.get<CoinGeckoResponse[]>(
+      `${API_ENDPOINTS.COINGECKO}/coins/markets`,
+      {
+        params: {
+          vs_currency: "usd",
+          order: "market_cap_desc",
+          per_page: 5,
+          page: 1,
+          sparkline: false,
+        },
+      }
+    );
+
+    return response.data.map((coin) => ({
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
+      current_price: coin.current_price,
+      price_change_percentage_24h: coin.price_change_percentage_24h,
+      market_cap: coin.market_cap,
+      type: "crypto",
+    }));
+  } catch (error) {
+    console.error("Error fetching crypto data:", error);
+    return [];
+  }
+}
+
+export async function GET() {
+  try {
+    let stocks: MarketData[] = [];
+    let commodities: MarketData[] = [];
+    let crypto: MarketData[] = [];
+
+    if (!disableCache) {
+      // Try to get data from Redis cache
+      const [cachedStocks, cachedCommodities, cachedCrypto] = await Promise.all([
+        redis.get<MarketData[]>(STOCKS_CACHE_KEY),
+        redis.get<MarketData[]>(COMMODITIES_CACHE_KEY),
+        redis.get<MarketData[]>(CRYPTO_CACHE_KEY),
+      ]);
+
+      const now = Date.now();
+      const stocksNeedUpdate =
+        !cachedStocks ||
+        now -
+          ((await redis.get<number>(`${STOCKS_CACHE_KEY}:timestamp`)) || 0) >
+          STOCK_CACHE_DURATION;
+      const commoditiesNeedUpdate =
+        !cachedCommodities ||
+        now -
+          ((await redis.get<number>(`${COMMODITIES_CACHE_KEY}:timestamp`)) ||
+            0) >
+          COMMODITY_CACHE_DURATION;
+      const cryptoNeedUpdate =
+        !cachedCrypto ||
+        now -
+          ((await redis.get<number>(`${CRYPTO_CACHE_KEY}:timestamp`)) || 0) >
+          CRYPTO_CACHE_DURATION;
+
+      if (stocksNeedUpdate) {
+        stocks = await fetchStockData();
+        await Promise.all([
+          redis.set(STOCKS_CACHE_KEY, stocks),
+          redis.set(`${STOCKS_CACHE_KEY}:timestamp`, now),
+        ]);
+      } else {
+        stocks = cachedStocks || [];
+      }
+
+      if (commoditiesNeedUpdate) {
+        commodities = await fetchCommodityData();
+        await Promise.all([
+          redis.set(COMMODITIES_CACHE_KEY, commodities),
+          redis.set(`${COMMODITIES_CACHE_KEY}:timestamp`, now),
+        ]);
+      } else {
+        commodities = cachedCommodities || [];
+      }
+
+      if (cryptoNeedUpdate) {
+        crypto = await fetchCryptoData();
+        await Promise.all([
+          redis.set(CRYPTO_CACHE_KEY, crypto),
+          redis.set(`${CRYPTO_CACHE_KEY}:timestamp`, now),
+        ]);
+      } else {
+        crypto = cachedCrypto || [];
+      }
+    } else {
+      [stocks, commodities, crypto] = await Promise.all([
         fetchStockData(),
         fetchCommodityData(),
+        fetchCryptoData(),
       ]);
-      lastStockFetchTime = currentTime;
-      lastCommodityFetchTime = currentTime;
-    } else if (needNewStockData) {
-      // Only fetch stocks if needed
-      stocks = await fetchStockData();
-      commodities = cachedData?.commodities || [];
-      lastStockFetchTime = currentTime;
-    } else if (needNewCommodityData) {
-      // Only fetch commodities if needed
-      commodities = await fetchCommodityData();
-      stocks = cachedData?.stocks || [];
-      lastCommodityFetchTime = currentTime;
-    } else {
-      // Use all cached data
-      stocks = cachedData?.stocks || [];
-      commodities = cachedData?.commodities || [];
     }
 
-    // Update cache
-    cachedData = { 
-      stocks, 
-      commodities, 
-      timestamp: currentTime 
-    };
-
-    return NextResponse.json(cachedData);
+    return NextResponse.json({
+      stocks,
+      commodities,
+      crypto,
+    });
   } catch (error) {
-    console.error('Error fetching market data:', error);
-    // Return last cached data if available, otherwise return fallback data
-    return NextResponse.json(cachedData || FALLBACK_DATA);
+    console.error("Error fetching market data:", error);
+    return NextResponse.json({
+      ...FALLBACK_DATA,
+      crypto: [],
+    });
   }
 }
