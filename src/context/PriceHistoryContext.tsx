@@ -23,8 +23,8 @@ interface CacheEntry {
   timestamp: number;
 }
 
-const CACHE_EXPIRATION = 30 * 1000; // 30 seconds in milliseconds
-const AUTO_REFRESH_INTERVAL = 10 * 1000; // 30 seconds in milliseconds
+const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 mins in milliseconds
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 mins in milliseconds
 
 const PriceHistoryContext = createContext<PriceHistoryContextType | undefined>(
   undefined
