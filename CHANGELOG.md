@@ -11,8 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added GitHub Actions workflow for automated deployment
   - Created tag-based deployment workflow
-  - Automatically merges main branch into deploy branch on tag creation
+  - Automatically merges main branch into deploy branch for tags with -prod suffix
+  - Automatically merges main branch into preview branch for other tags
+  - Automatically updates package.json version from git tag
+  - Triggers Vercel deployment automatically for preview branch
   - Uses custom PAT token for authentication
+- Added version display in application footer
+  - Shows current version from package.json
+  - Updates automatically with git tags
+  - update
 
 ### Changed
 
