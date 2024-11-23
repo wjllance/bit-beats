@@ -8,15 +8,17 @@ export const formatDateTime = (dateStr: string) => {
   }
 
   try {
-    const date = new Date();
     const parts = dateStr.split(", ");
     const monthDay = parts[0]; // This will be "Nov 2" or "Nov 23" in both formats
     const [month, day] = monthDay.split(" ");
     
-    const monthIndex = new Date(Date.parse(month + " 1, 2000")).getMonth();
-    date.setMonth(monthIndex);
-    date.setDate(parseInt(day));
-    date.setSeconds(0);
+    // Create date in local timezone
+    const now = new Date();
+    const date = new Date(
+      now.getFullYear(),
+      new Date(Date.parse(month + " 1, 2000")).getMonth(),
+      parseInt(day)
+    );
 
     // If we have time information
     if (parts.length > 1) {
@@ -30,20 +32,24 @@ export const formatDateTime = (dateStr: string) => {
 
       date.setHours(hour);
       date.setMinutes(parseInt(minutes));
+      date.setSeconds(0);
     } else {
       // If no time provided, set to midnight
       date.setHours(0);
       date.setMinutes(0);
+      date.setSeconds(0);
     }
 
     console.log(
       "formatDateTime",
       dateStr,
       "->",
+      "Local:",
       date.toLocaleString(),
-      "(Unix:",
-      date.getTime(),
-      ")"
+      "UTC:",
+      date.toUTCString(),
+      "Unix:",
+      date.getTime()
     );
 
     return {
