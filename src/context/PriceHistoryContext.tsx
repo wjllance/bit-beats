@@ -2,7 +2,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import { TimeframeOption, PriceData } from '../types';
-import { API_ENDPOINTS } from '../utils/api-config';
 
 interface PriceHistoryContextType {
   priceData: PriceData;
@@ -21,7 +20,6 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
   const [timeframe, setTimeframe] = useState<TimeframeOption>({
     label: '24H',
     days: 1,
-    // interval: 'hourly'
   });
 
   useEffect(() => {
@@ -30,31 +28,14 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(
-          `${API_ENDPOINTS.COINGECKO}/coins/bitcoin/market_chart`,
-          {
-            params: {
-              vs_currency: 'usd',
-              days: timeframe.days,
-              interval: timeframe.interval,
-            },
-          }
-        );
+        const response = await axios.get('/api/price-history', {
+          params: {
+            days: timeframe.days,
+            interval: timeframe.interval,
+          },
+        });
 
-        const { prices } = response.data;
-        const formattedData: PriceData = {
-          labels: prices.map(([timestamp]: [number, number]) =>
-            new Date(timestamp).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              hour: timeframe.days <= 1 ? 'numeric' : undefined,
-              minute: timeframe.days <= 1 ? 'numeric' : undefined,
-            })
-          ),
-          prices: prices.map(([, price]: [number, number]) => price),
-        };
-
-        setPriceData(formattedData);
+        setPriceData(response.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch price history');
         console.error('Error fetching price history:', err);
