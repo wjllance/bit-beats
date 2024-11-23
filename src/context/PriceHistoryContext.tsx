@@ -18,6 +18,13 @@ interface PriceHistoryContextType {
   setTimeframe: (timeframe: TimeframeOption) => void;
 }
 
+interface CacheEntry {
+  data: PriceData;
+  timestamp: number;
+}
+
+const CACHE_EXPIRATION = 30 * 1000; // 30 seconds in milliseconds
+
 const PriceHistoryContext = createContext<PriceHistoryContextType | undefined>(
   undefined
 );
@@ -34,18 +41,34 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
     days: 1,
   });
 
+  const cacheRef = useRef<Record<number, CacheEntry>>({});
+
   useEffect(() => {
     const fetchPriceHistory = async () => {
       try {
+        const cachedData = cacheRef.current[timeframe.days];
+        const now = Date.now();
+
+        // Check if we have valid cached data
+        if (cachedData && now - cachedData.timestamp < CACHE_EXPIRATION) {
+          setPriceData(cachedData.data);
+          return;
+        }
+
         setIsLoading(true);
         setError(null);
 
         const response = await axios.get("/api/price-history", {
           params: {
             days: timeframe.days,
-            // interval: timeframe.interval,
           },
         });
+
+        // Update cache
+        cacheRef.current[timeframe.days] = {
+          data: response.data,
+          timestamp: now,
+        };
 
         setPriceData(response.data);
       } catch (err) {
