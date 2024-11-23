@@ -24,6 +24,7 @@ interface CacheEntry {
 }
 
 const CACHE_EXPIRATION = 30 * 1000; // 30 seconds in milliseconds
+const AUTO_REFRESH_INTERVAL = 5 * 1000; // 30 seconds in milliseconds
 
 const PriceHistoryContext = createContext<PriceHistoryContextType | undefined>(
   undefined
@@ -43,45 +44,51 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
 
   const cacheRef = useRef<Record<number, CacheEntry>>({});
 
-  useEffect(() => {
-    const fetchPriceHistory = async () => {
-      try {
-        const cachedData = cacheRef.current[timeframe.days];
-        const now = Date.now();
+  const fetchPriceHistory = async () => {
+    try {
+      const cachedData = cacheRef.current[timeframe.days];
+      const now = Date.now();
 
-        // Check if we have valid cached data
-        if (cachedData && now - cachedData.timestamp < CACHE_EXPIRATION) {
-          setPriceData(cachedData.data);
-          return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        const response = await axios.get("/api/price-history", {
-          params: {
-            days: timeframe.days,
-          },
-        });
-
-        // Update cache
-        cacheRef.current[timeframe.days] = {
-          data: response.data,
-          timestamp: now,
-        };
-
-        setPriceData(response.data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch price history"
-        );
-        console.error("Error fetching price history:", err);
-      } finally {
-        setIsLoading(false);
+      // Check if we have valid cached data
+      if (cachedData && now - cachedData.timestamp < CACHE_EXPIRATION) {
+        setPriceData(cachedData.data);
+        return;
       }
-    };
 
+      setIsLoading(true);
+      setError(null);
+
+      const response = await axios.get("/api/price-history", {
+        params: {
+          days: timeframe.days,
+        },
+      });
+
+      // Update cache
+      cacheRef.current[timeframe.days] = {
+        data: response.data,
+        timestamp: now,
+      };
+
+      setPriceData(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch price history"
+      );
+      console.error("Error fetching price history:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPriceHistory();
+
+    // Set up auto-refresh interval
+    const intervalId = setInterval(fetchPriceHistory, AUTO_REFRESH_INTERVAL);
+
+    // Cleanup interval on unmount or when timeframe changes
+    return () => clearInterval(intervalId);
   }, [timeframe.days]);
 
   return (
