@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { PriceData } from "../../types";
+import { formatDateTime } from "@/utils/dateFormat";
 
 interface PriceDisplayProps {
   priceData: PriceData;
@@ -17,28 +18,6 @@ const formatPrice = (price: number | undefined): string => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-};
-
-const formatDateTime = (dateStr: string): { time: string; date: string } => {
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) {
-    return {
-      time: "Invalid time",
-      date: "Invalid date",
-    };
-  }
-  // Force current year
-  const currentYear = new Date().getFullYear();
-  date.setFullYear(currentYear);
-
-  return {
-    time: date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }),
-    date: date.toLocaleDateString("en-US"),
-  };
 };
 
 export default function PriceDisplay({

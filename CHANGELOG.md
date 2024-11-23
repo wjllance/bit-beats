@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2024-11-23
+
+### Added
+
+- Added GitHub Actions workflow for automated deployment
+  - Created tag-based deployment workflow
+  - Automatically merges main branch into deploy branch on tag creation
+  - Uses custom PAT token for authentication
+
+### Changed
+
+- Refactored date formatting utilities
+  - Created centralized dateFormat.ts utility
+  - Improved date string parsing for both "Nov 2" and "Nov 23, 9:22 AM" formats
+  - Updated both desktop and mobile PriceDisplay components to use shared formatting
+
 ## [1.2.0] - 2024-11-23
 
 ### Changed
