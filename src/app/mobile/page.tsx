@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import MobileBitcoinChart from "../../components/mobile/MobileBitcoinChart";
-import MobileTopAssets from "../../components/mobile/MobileTopAssets";
-import MobileTimeframeSelector from "../../components/mobile/MobileTimeframeSelector";
-import MobileHeader from "../../components/mobile/MobileHeader";
-import PriceStatusBadge from "../../components/mobile/PriceStatusBadge";
-import PriceDisplay from "../../components/mobile/PriceDisplay";
-import { usePriceHistory } from "../../hooks/usePriceHistory";
+import MobileBitcoinChart from "@/components/mobile/MobileBitcoinChart";
+import MobileTopAssets from "@/components/mobile/MobileTopAssets";
+import MobileTimeframeSelector from "@/components/mobile/MobileTimeframeSelector";
+import MobileHeader from "@/components/mobile/MobileHeader";
+import PriceStatusBadge from "@/components/mobile/PriceStatusBadge";
+import PriceDisplay from "@/components/mobile/PriceDisplay";
+import { usePriceHistory } from "@/hooks/usePriceHistory";
 
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState({
