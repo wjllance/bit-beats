@@ -33,7 +33,8 @@ export default function BitcoinPriceTracker() {
           {/* Center chart */}
           <div className="col-span-6">
             <div className="bg-gray-800/50 rounded-lg p-6">
-              <div className="mb-4">
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
                 <TimeframeSelector
                   selectedTimeframe={selectedTimeframe}
                   onTimeframeChange={setSelectedTimeframe}

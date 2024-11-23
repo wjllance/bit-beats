@@ -134,7 +134,6 @@ export default function BitcoinChart({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
         {isLoading && (
           <span className="text-sm text-gray-400 animate-pulse">
             Updating...
