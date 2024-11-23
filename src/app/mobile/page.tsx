@@ -147,9 +147,15 @@ export default function MobilePage() {
                 </div>
                 <div className="flex items-center justify-end gap-1 text-[10px] text-gray-500">
                   Updated time:
-                  <span>{new Date().toLocaleTimeString()}</span>
-                  <span>•</span>
-                  <span>{new Date().toLocaleDateString()}</span>
+                  {priceData.labels && priceData.labels.length > 0 ? (
+                    <>
+                      <span>{new Date(priceData.labels[priceData.labels.length - 1]).toLocaleTimeString()}</span>
+                      <span>•</span>
+                      <span>{new Date(priceData.labels[priceData.labels.length - 1]).toLocaleDateString()}</span>
+                    </>
+                  ) : (
+                    <span>Loading...</span>
+                  )}
                 </div>
               </div>
             )}
