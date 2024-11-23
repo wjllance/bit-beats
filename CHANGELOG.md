@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added GitHub Actions workflow for automated deployment
   - Created tag-based deployment workflow
-  - Automatically merges main branch into deploy branch on tag creation
+  - Automatically merges main branch into deploy branch for tags with -prod suffix
+  - Automatically merges main branch into preview branch for other tags
   - Uses custom PAT token for authentication
 
 ### Changed

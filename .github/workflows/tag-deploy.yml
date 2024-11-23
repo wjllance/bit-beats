@@ -1,4 +1,4 @@
-name: Merge main to deploy on tag
+name: Merge main to deploy/preview on tag
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - "*"
 
 jobs:
-  merge-main-to-deploy:
+  merge-main:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,8 +20,17 @@ jobs:
           git config user.name wjllance
           git config user.email wjllance@163.com
 
-      - name: Merge main into deploy
+      - name: Set target branch
+        id: set-branch
         run: |
-          git checkout deploy
-          git merge origin/main --no-ff -m "Merge main into deploy for tag ${{ github.ref_name }}"
-          git push origin deploy
+          if [[ ${{ github.ref_name }} == *-prod ]]; then
+            echo "TARGET_BRANCH=deploy" >> $GITHUB_ENV
+          else
+            echo "TARGET_BRANCH=preview" >> $GITHUB_ENV
+          fi
+
+      - name: Merge main into target branch
+        run: |
+          git checkout ${{ env.TARGET_BRANCH }}
+          git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
+          git push origin ${{ env.TARGET_BRANCH }}
