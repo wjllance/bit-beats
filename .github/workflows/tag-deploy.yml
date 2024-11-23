@@ -37,15 +37,15 @@ jobs:
           VERSION=$(echo "$VERSION" | sed 's/^v//')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Update package.json version
-        run: |
-          # Update version in package.json
-          npm version ${{ env.VERSION }} --no-git-tag-version --allow-same-version
-
       - name: Merge main into target branch
         run: |
           git checkout ${{ env.TARGET_BRANCH }}
           git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
+
+      - name: Update package.json version
+        run: |
+          # Update version in package.json
+          npm version ${{ env.VERSION }} --no-git-tag-version --allow-same-version
           # Stage and commit the version change
           git add package.json
           git commit --amend --no-edit
