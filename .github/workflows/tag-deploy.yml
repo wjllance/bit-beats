@@ -20,24 +20,44 @@ jobs:
           git config user.name wjllance
           git config user.email wjllance@163.com
 
-      - name: Set target branch
+      - name: Set target branch and version
         id: set-branch
         run: |
           if [[ ${{ github.ref_name }} == *-prod ]]; then
             echo "TARGET_BRANCH=deploy" >> $GITHUB_ENV
             echo "IS_PREVIEW=false" >> $GITHUB_ENV
+            # Extract version without -prod suffix
+            VERSION=$(echo "${{ github.ref_name }}" | sed 's/-prod$//')
           else
             echo "TARGET_BRANCH=preview" >> $GITHUB_ENV
             echo "IS_PREVIEW=true" >> $GITHUB_ENV
+            VERSION="${{ github.ref_name }}"
           fi
+          # Remove 'v' prefix if present
+          VERSION=$(echo "$VERSION" | sed 's/^v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update package.json version
+        run: |
+          # Update version in package.json
+          npm version ${{ env.VERSION }} --no-git-tag-version --allow-same-version
 
       - name: Merge main into target branch
         run: |
           git checkout ${{ env.TARGET_BRANCH }}
           git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
+          # Stage and commit the version change
+          git add package.json
+          git commit --amend --no-edit
           git push origin ${{ env.TARGET_BRANCH }}
 
       - name: Trigger Preview Deployment
         if: env.IS_PREVIEW == 'true'
         run: |
-          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_gTN6H29e6q0jnvKmwDZj17GgRBh9/SqG9JEJaXG"
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_gTN6H29e6q0jnvKmwDZj17GgRBh9/SqG9JEJaXG" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "environmentVariables": {
+                "NEXT_PUBLIC_APP_VERSION": "${{ github.ref_name }}"
+              }
+            }'
