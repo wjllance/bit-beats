@@ -54,6 +54,25 @@ export default function PriceDisplay({
         <span className="text-sm text-red-400">{error}</span>
       ) : (
         <div>
+          <div className="flex items-center justify-end gap-1 text-[10px] text-gray-500">
+            Updated time:
+            {priceData.labels && priceData.labels.length > 0 ? (
+              (() => {
+                const { time, date } = formatDateTime(
+                  priceData.labels[priceData.labels.length - 1]
+                );
+                return (
+                  <>
+                    <span>{time}</span>
+                    <span>•</span>
+                    <span>{date}</span>
+                  </>
+                );
+              })()
+            ) : (
+              <span>Loading...</span>
+            )}
+          </div>
           <div className="flex items-baseline justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-bold text-white">
@@ -83,25 +102,6 @@ export default function PriceDisplay({
                 </div>
               )}
             </div>
-          </div>
-          <div className="flex items-center justify-end gap-1 text-[10px] text-gray-500">
-            Updated time:
-            {priceData.labels && priceData.labels.length > 0 ? (
-              (() => {
-                const { time, date } = formatDateTime(
-                  priceData.labels[priceData.labels.length - 1]
-                );
-                return (
-                  <>
-                    <span>{time}</span>
-                    <span>•</span>
-                    <span>{date}</span>
-                  </>
-                );
-              })()
-            ) : (
-              <span>Loading...</span>
-            )}
           </div>
         </div>
       )}
