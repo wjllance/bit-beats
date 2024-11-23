@@ -290,11 +290,13 @@ export async function GET() {
 
     if (!disableCache) {
       // Try to get data from Redis cache
-      const [cachedStocks, cachedCommodities, cachedCrypto] = await Promise.all([
-        redis.get<MarketData[]>(STOCKS_CACHE_KEY),
-        redis.get<MarketData[]>(COMMODITIES_CACHE_KEY),
-        redis.get<MarketData[]>(CRYPTO_CACHE_KEY),
-      ]);
+      const [cachedStocks, cachedCommodities, cachedCrypto] = await Promise.all(
+        [
+          redis.get<MarketData[]>(STOCKS_CACHE_KEY),
+          redis.get<MarketData[]>(COMMODITIES_CACHE_KEY),
+          redis.get<MarketData[]>(CRYPTO_CACHE_KEY),
+        ]
+      );
 
       const now = Date.now();
       const stocksNeedUpdate =
@@ -315,32 +317,38 @@ export async function GET() {
           CRYPTO_CACHE_DURATION;
 
       if (stocksNeedUpdate) {
+        console.log("stocksNeedUpdate");
         stocks = await fetchStockData();
         await Promise.all([
           redis.set(STOCKS_CACHE_KEY, stocks),
           redis.set(`${STOCKS_CACHE_KEY}:timestamp`, now),
         ]);
       } else {
+        console.log("using cached stocks");
         stocks = cachedStocks || [];
       }
 
       if (commoditiesNeedUpdate) {
+        console.log("commoditiesNeedUpdate");
         commodities = await fetchCommodityData();
         await Promise.all([
           redis.set(COMMODITIES_CACHE_KEY, commodities),
           redis.set(`${COMMODITIES_CACHE_KEY}:timestamp`, now),
         ]);
       } else {
+        console.log("using cached commodities");
         commodities = cachedCommodities || [];
       }
 
       if (cryptoNeedUpdate) {
+        console.log("cryptoNeedUpdate");
         crypto = await fetchCryptoData();
         await Promise.all([
           redis.set(CRYPTO_CACHE_KEY, crypto),
           redis.set(`${CRYPTO_CACHE_KEY}:timestamp`, now),
         ]);
       } else {
+        console.log("using cached crypto");
         crypto = cachedCrypto || [];
       }
     } else {
