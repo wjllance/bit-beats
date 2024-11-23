@@ -35,9 +35,17 @@ jobs:
         run: |
           git checkout ${{ env.TARGET_BRANCH }}
           git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
+          # Set version environment variable for Vercel
+          echo "NEXT_PUBLIC_APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           git push origin ${{ env.TARGET_BRANCH }}
 
       - name: Trigger Preview Deployment
         if: env.IS_PREVIEW == 'true'
         run: |
-          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_gTN6H29e6q0jnvKmwDZj17GgRBh9/SqG9JEJaXG"
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_gTN6H29e6q0jnvKmwDZj17GgRBh9/SqG9JEJaXG" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "environmentVariables": {
+                "NEXT_PUBLIC_APP_VERSION": "${{ github.ref_name }}"
+              }
+            }'
