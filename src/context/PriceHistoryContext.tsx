@@ -6,6 +6,7 @@ import {
   useEffect,
   ReactNode,
   useRef,
+  useCallback,
 } from "react";
 import axios from "axios";
 import { TimeframeOption, PriceData } from "../types";
@@ -49,7 +50,7 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
 
   const cacheRef = useRef<Record<number, CacheEntry>>({});
 
-  const fetchPriceHistory = async () => {
+  const fetchPriceHistory = useCallback(async () => {
     try {
       const cachedData = cacheRef.current[timeframe.days];
       const now = Date.now();
@@ -84,7 +85,7 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeframe.days]);
 
   useEffect(() => {
     fetchPriceHistory();
@@ -94,7 +95,7 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
 
     // Cleanup interval on unmount or when timeframe changes
     return () => clearInterval(intervalId);
-  }, [timeframe.days]);
+  }, [fetchPriceHistory]);
 
   return (
     <PriceHistoryContext.Provider

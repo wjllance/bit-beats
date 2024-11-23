@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import { useState, useEffect } from "react";
 
 interface PriceDisplayProps {
@@ -70,7 +69,6 @@ export default function PriceDisplay({
   currentPrice,
   priceData,
   error,
-  isLoading,
 }: PriceDisplayProps) {
   const [currentSlogan, setCurrentSlogan] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);

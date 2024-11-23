@@ -44,7 +44,6 @@ const formatDateTime = (dateStr: string): { time: string; date: string } => {
 export default function PriceDisplay({
   priceData,
   error,
-  isLoading,
   currentPrice,
   priceChange,
 }: PriceDisplayProps) {
