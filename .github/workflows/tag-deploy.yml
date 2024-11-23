@@ -25,8 +25,10 @@ jobs:
         run: |
           if [[ ${{ github.ref_name }} == *-prod ]]; then
             echo "TARGET_BRANCH=deploy" >> $GITHUB_ENV
+            echo "IS_PREVIEW=false" >> $GITHUB_ENV
           else
             echo "TARGET_BRANCH=preview" >> $GITHUB_ENV
+            echo "IS_PREVIEW=true" >> $GITHUB_ENV
           fi
 
       - name: Merge main into target branch
@@ -34,3 +36,8 @@ jobs:
           git checkout ${{ env.TARGET_BRANCH }}
           git merge origin/main --no-ff -m "Merge main into ${{ env.TARGET_BRANCH }} for tag ${{ github.ref_name }}"
           git push origin ${{ env.TARGET_BRANCH }}
+
+      - name: Trigger Preview Deployment
+        if: env.IS_PREVIEW == 'true'
+        run: |
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_gTN6H29e6q0jnvKmwDZj17GgRBh9/SqG9JEJaXG"
