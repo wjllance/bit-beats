@@ -1,0 +1,27 @@
+name: Merge main to deploy on tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  merge-main-to-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Merge main into deploy
+        run: |
+          git checkout deploy
+          git merge main --no-ff -m "Merge main into deploy for tag ${{ github.ref_name }}"
+          git push origin deploy
