@@ -34,7 +34,14 @@ export default function BitcoinPriceTracker() {
           <div className="col-span-6">
             <div className="bg-gray-800/50 rounded-lg p-6">
               <div className="flex flex-col items-center gap-4 mb-6">
-                <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
+                <div className="flex items-center justify-between w-full">
+                  <h2 className="text-lg font-semibold text-yellow-500">Price Chart</h2>
+                  {isLoading && (
+                    <span className="text-sm text-gray-400 animate-pulse">
+                      Updating...
+                    </span>
+                  )}
+                </div>
                 <TimeframeSelector
                   selectedTimeframe={selectedTimeframe}
                   onTimeframeChange={setSelectedTimeframe}
@@ -43,7 +50,6 @@ export default function BitcoinPriceTracker() {
               <BitcoinChart
                 priceData={priceData}
                 selectedTimeframe={selectedTimeframe}
-                isLoading={isLoading}
               />
             </div>
           </div>

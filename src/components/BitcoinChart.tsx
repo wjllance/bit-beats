@@ -29,13 +29,11 @@ ChartJS.register(
 interface BitcoinChartProps {
   priceData: PriceData;
   selectedTimeframe: TimeframeOption;
-  isLoading: boolean;
 }
 
 export default function BitcoinChart({
   priceData,
   selectedTimeframe,
-  isLoading,
 }: BitcoinChartProps) {
   const options: ChartOptions<"line"> = {
     responsive: true,
@@ -133,13 +131,7 @@ export default function BitcoinChart({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        {isLoading && (
-          <span className="text-sm text-gray-400 animate-pulse">
-            Updating...
-          </span>
-        )}
-      </div>
+      <div className="flex items-center justify-between mb-4"></div>
       <div className="relative h-[350px] w-full">
         {priceData.labels.length > 0 ? (
           <Line options={options} data={data} />
