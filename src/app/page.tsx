@@ -7,7 +7,6 @@ import TimeframeSelector from "@/components/TimeframeSelector";
 import PriceDisplay from "@/components/PriceDisplay";
 import TopAssets from "@/components/TopAssets";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
-import { APP_VERSION } from "@/utils/version";
 
 export default function BitcoinPriceTracker() {
   const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({
@@ -65,7 +64,6 @@ export default function BitcoinPriceTracker() {
 
         <footer className="text-center mt-6 text-yellow-500/80 text-sm">
           <p>Data provided by CoinGecko API • Updated every 5 minutes</p>
-          <p className="mt-1 text-yellow-500/60">Version {APP_VERSION}</p>
         </footer>
       </div>
     </main>

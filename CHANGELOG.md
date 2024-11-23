@@ -15,9 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatically merges main branch into preview branch for other tags
   - Triggers Vercel deployment automatically for preview branch
   - Uses custom PAT token for authentication
-- Added version display in application footer
-  - Shows current git tag version
-  - Updates automatically with each deployment
 
 ### Changed
 
