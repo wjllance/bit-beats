@@ -17,8 +17,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name wjllance
+          git config user.email wjllance@163.com
 
       - name: Merge main into deploy
         run: |
