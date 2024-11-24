@@ -93,14 +93,11 @@ export default function PriceDisplay({
               Updated time:
               {priceData.labels && priceData.labels.length > 0 ? (
                 (() => {
-                  const { time, date } = formatDateTime(
-                    priceData.labels[priceData.labels.length - 1]
-                  );
+                  const datetime =
+                    priceData.labels[priceData.labels.length - 1];
                   return (
                     <>
-                      <span>{time}</span>
-                      <span>•</span>
-                      <span>{date}</span>
+                      <span>{datetime}</span>
                     </>
                   );
                 })()

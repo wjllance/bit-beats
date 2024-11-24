@@ -13,8 +13,8 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN!,
 });
 
-interface PriceData {
-  labels: string[];
+export interface RawPriceData {
+  labels: number[];
   prices: number[];
 }
 
@@ -24,7 +24,7 @@ const PRICE_HISTORY_CACHE_KEY = "price_history";
 async function fetchPriceHistory(
   days: number,
   interval?: string
-): Promise<PriceData> {
+): Promise<RawPriceData> {
   try {
     const response = await axios.get(
       `${API_ENDPOINTS.COINGECKO}/coins/bitcoin/market_chart`,
@@ -39,14 +39,7 @@ async function fetchPriceHistory(
 
     const { prices } = response.data;
     return {
-      labels: prices.map(([timestamp]: [number, number]) =>
-        new Date(timestamp).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          hour: days <= 1 ? "numeric" : undefined,
-          minute: days <= 1 ? "numeric" : undefined,
-        })
-      ),
+      labels: prices.map(([timestamp]: [number, number]) => timestamp),
       prices: prices.map(([, price]: [number, number]) => price),
     };
   } catch (error) {
@@ -69,7 +62,7 @@ export async function GET(request: Request) {
 
     if (!DISABLE_CACHE) {
       // Try to get data from Redis cache
-      const cachedData = await redis.get<PriceData>(cacheKey);
+      const cachedData = await redis.get<RawPriceData>(cacheKey);
       const lastUpdate = await redis.get<number>(`${cacheKey}:timestamp`);
       const now = Date.now();
 
