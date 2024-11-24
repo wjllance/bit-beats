@@ -16,13 +16,13 @@ export type Asset = {
   current_price: number;
   price_change_percentage_24h: number;
   market_cap: number;
-  type: 'crypto' | 'stock' | 'commodity';
+  type: "crypto" | "stock" | "commodity";
 };
 
 export const timeframeOptions: TimeframeOption[] = [
-  { label: '24h', days: 1 },
-  { label: '7d', days: 7 },
-  { label: '30d', days: 30 },
-  { label: '180d', days: 180 },
-  { label: '1y', days: 365 },
+  { label: "24h", days: 1 },
+  { label: "7d", days: 7 },
+  { label: "30d", days: 30 },
+  { label: "180d", days: 180 },
+  { label: "1y", days: 365 },
 ];
