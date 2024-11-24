@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatDateTime } from "@/utils/dateFormat";
 
 interface PriceDisplayProps {
   currentPrice: number | null;

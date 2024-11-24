@@ -2,7 +2,6 @@
 
 import clsx from "clsx";
 import { PriceData } from "../../types";
-import { formatDateTime } from "@/utils/dateFormat";
 
 interface PriceDisplayProps {
   priceData: PriceData;
