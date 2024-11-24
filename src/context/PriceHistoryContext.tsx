@@ -10,6 +10,7 @@ import {
 } from "react";
 import axios from "axios";
 import { TimeframeOption, PriceData } from "../types";
+import { RawPriceData } from "@/app/api/price-history/route";
 
 interface PriceHistoryContextType {
   priceData: PriceData;
@@ -70,13 +71,25 @@ export function PriceHistoryProvider({ children }: { children: ReactNode }) {
         },
       });
 
+      const respData: PriceData = {
+        labels: (response.data as RawPriceData).labels.map((label) =>
+          new Date(label).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: timeframe.days <= 7 ? "numeric" : undefined,
+            minute: timeframe.days <= 7 ? "numeric" : undefined,
+          })
+        ),
+        prices: response.data.prices,
+      };
+
       // Update cache
       cacheRef.current[timeframe.days] = {
-        data: response.data,
+        data: respData,
         timestamp: now,
       };
 
-      setPriceData(response.data);
+      setPriceData(respData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch price history"
