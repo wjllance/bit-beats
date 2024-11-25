@@ -5,9 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.x] - 2024-11-25
+## [1.5.0] - 2024-11-25
 
 ### Changed
+
+- Enhanced SEO optimization
+  - Added comprehensive meta tags for better search engine visibility
+  - Implemented OpenGraph tags for improved social media sharing
+  - Added Twitter Card metadata for better Twitter integration
+  - Updated site title and description for better SEO
+  - Added keywords and author information
+
+- Improved footer design and functionality
+  - Added copyright information and contact details
+  - Implemented responsive layout with grid system
+  - Added social media links with interactive icons
+  - Enhanced mobile responsiveness with adaptive content
+  - Improved visual hierarchy and spacing
 
 - Improved PriceHistoryContext implementation
   - Added proper TypeScript types for price history data
