@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import clsx from "clsx";
+import Logo from "@/assets/logo.svg";
 
 const SLOGANS = [
   "Watch Bitcoin Rise to the Top",
@@ -36,8 +37,8 @@ export default function MobileHeader() {
 
   return (
     <div className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-500/20">
-        <span className="text-gray-900 text-lg font-bold">₿</span>
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center ">
+        <img src="/images/logo.png" alt="Logo" className="w-8 h-8 " />
       </div>
       <div className="flex flex-col">
         <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text tracking-tight leading-none">
