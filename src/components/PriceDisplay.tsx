@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 interface PriceDisplayProps {
@@ -75,7 +76,7 @@ export default function PriceDisplay({
           {/* Left: Logo and Title */}
           <div className="flex items-center group cursor-pointer">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/images/logo.png" alt="Logo" className="w-8 h-8" />
+              <Image src="/images/logo.png" alt="Logo" width={32} height={32} />
             </div>
 
             <h1 className="ml-4 text-3xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text group-hover:from-yellow-400 group-hover:via-yellow-200 group-hover:to-yellow-400 transition-all duration-300">
