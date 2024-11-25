@@ -37,7 +37,7 @@ export default function MobileHeader() {
 
   return (
     <div className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-500/20">
+      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center ">
         <img
           src={Logo.src}
           alt="Logo"
