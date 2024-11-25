@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2024-11-24
+
+### Changed
+
+- Improved PriceHistoryContext implementation
+  - Added proper TypeScript types for price history data
+  - Implemented error state management
+  - Added loading state handling
+  - Enhanced timeframe management with type safety
+- Add analytics and speed insights
+
 ## [1.4.0] - 2024-11-24
 
 ### Changed
