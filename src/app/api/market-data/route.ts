@@ -5,7 +5,6 @@ import {
   API_ENDPOINTS,
   API_KEYS,
   STOCK_CACHE_DURATION,
-  COMMODITY_CACHE_DURATION,
   CRYPTO_CACHE_DURATION,
   DISABLE_CACHE,
 } from "@/utils/api-config";
@@ -334,7 +333,7 @@ async function fetchCommodityData(): Promise<{
 
     if (!disableCache) {
       // Try to get today's cached data
-      let todayCacheKey = `${COMMODITIES_CACHE_KEY}:${formatDate(today)}`;
+      const todayCacheKey = `${COMMODITIES_CACHE_KEY}:${formatDate(today)}`;
       const cachedToday = await redis.get<{ gold: number; silver: number }>(
         todayCacheKey
       );
