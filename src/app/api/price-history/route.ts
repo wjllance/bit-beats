@@ -71,14 +71,14 @@ export async function GET(request: Request) {
         lastUpdate &&
         now - lastUpdate < PRICE_HISTORY_CACHE_DURATION
       ) {
-        console.log("Returning cached data");
+        console.log("Price history API: Returning cached data");
         return NextResponse.json(cachedData);
       }
     }
 
     // Fetch fresh data
     const priceData = await fetchPriceHistory(days, interval);
-    console.log("Fetched fresh data");
+    console.log("Price history API: Fetched fresh data");
 
     if (!DISABLE_CACHE) {
       // Update cache

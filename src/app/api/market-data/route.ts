@@ -279,8 +279,9 @@ async function fetchCommodityData(): Promise<{
 }> {
   const formatDate = (date: Date): string => date.toISOString().split("T")[0];
   const today = new Date();
+  today.setDate(today.getDate() - 1);
   const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 2);
+  yesterday.setDate(yesterday.getDate() - 1);
 
   const calculateMarketCap = (
     pricePerOunce: number,
@@ -297,24 +298,23 @@ async function fetchCommodityData(): Promise<{
   };
 
   const fetchMetalPrice = async (
-    isYesterday: boolean = false
+    date: string
   ): Promise<{ gold: number; silver: number; timestamp: number }> => {
-    const suffix = isYesterday ? "yesterday" : "latest";
     try {
       const [goldResponse, silverResponse] = await Promise.all([
-        axios.get<MetalPriceResponse>(
-          `${API_ENDPOINTS.METAL_PRICE}/${suffix}`,
-          {
-            params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
-          }
-        ),
-        axios.get<MetalPriceResponse>(
-          `${API_ENDPOINTS.METAL_PRICE}/${suffix}`,
-          {
-            params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
-          }
-        ),
+        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${date}`, {
+          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
+        }),
+        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/${date}`, {
+          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
+        }),
       ]);
+
+      console.log(
+        `fetching metal prices for ${date}`,
+        goldResponse.data,
+        silverResponse.data
+      );
 
       return {
         gold: goldResponse.data.rates?.USDXAU || 0,
@@ -322,7 +322,7 @@ async function fetchCommodityData(): Promise<{
         timestamp: goldResponse.data.timestamp,
       };
     } catch (error) {
-      console.error(`Error fetching metal prices for ${suffix}:`, error);
+      console.error(`Error fetching metal prices for ${date}:`, error);
       throw error;
     }
   };
@@ -344,7 +344,7 @@ async function fetchCommodityData(): Promise<{
         todayPrices = cachedToday;
         fromCache = true;
       } else {
-        todayPrices = await fetchMetalPrice();
+        todayPrices = await fetchMetalPrice(formatDate(today));
         await redis.set(todayCacheKey, todayPrices);
       }
 
@@ -360,13 +360,13 @@ async function fetchCommodityData(): Promise<{
         console.log("using cached yesterday's commodity prices");
         yesterdayPrices = cachedYesterday;
       } else {
-        yesterdayPrices = await fetchMetalPrice(true);
+        yesterdayPrices = await fetchMetalPrice(formatDate(yesterday));
         await redis.set(yesterdayCacheKey, yesterdayPrices);
       }
     } else {
       [todayPrices, yesterdayPrices] = await Promise.all([
-        fetchMetalPrice(),
-        fetchMetalPrice(true),
+        fetchMetalPrice(formatDate(today)),
+        fetchMetalPrice(formatDate(yesterday)),
       ]);
     }
 
