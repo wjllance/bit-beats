@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Enhanced SEO optimization
+
   - Added comprehensive meta tags for better search engine visibility
   - Implemented OpenGraph tags for improved social media sharing
   - Added Twitter Card metadata for better Twitter integration
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added keywords and author information
 
 - Improved footer design and functionality
+
   - Added copyright information and contact details
   - Implemented responsive layout with grid system
   - Added social media links with interactive icons
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added loading state handling
   - Enhanced timeframe management with type safety
 - Add analytics and speed insights
+- Update logo
 
 ## [1.4.0] - 2024-11-24
 
