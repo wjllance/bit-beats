@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-11-25
+
+### Changed
+
+- Improved market data caching and API integration
+
+  - Refactored commodity data fetching with date-specific caching
+  - Optimized cache durations for different data types:
+    - Stocks: 20 minutes
+    - Crypto: 2 minutes
+    - Price history: 2 minutes
+  - Enhanced logging for better debugging
+  - Added timestamp tracking for metal price data
+  - Fixed date handling for commodity price calculations
+
+- API Configuration Updates
+  - Updated Metal Price API integration
+  - Enabled caching system
+  - Added proper API keys configuration
+
 ## [1.5.0] - 2024-11-25
 
 ### Changed
