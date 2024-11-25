@@ -200,6 +200,7 @@ interface MetalPriceResponse {
     USDXAU?: number;
     USDXAG?: number;
   };
+  timestamp: number;
 }
 
 interface CoinGeckoResponse {
@@ -276,118 +277,127 @@ async function fetchCommodityData(): Promise<{
   data: MarketData[];
   fromCache: boolean;
 }> {
-  if (!disableCache) {
-    // Try to get data from Redis cache
-    const cachedCommodities = await redis.get<MarketData[]>(
-      COMMODITIES_CACHE_KEY
-    );
-    const now = Date.now();
-    const cachedTimestamp = await redis.get<number>(
-      `${COMMODITIES_CACHE_KEY}:timestamp`
-    );
-    const commoditiesNeedUpdate =
-      !cachedCommodities ||
-      now - (cachedTimestamp || 0) > COMMODITY_CACHE_DURATION;
+  const formatDate = (date: Date): string => date.toISOString().split("T")[0];
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 2);
 
-    if (!commoditiesNeedUpdate && cachedCommodities) {
-      console.log("using cached commodities");
-      return { data: cachedCommodities, fromCache: true };
-    }
-  }
+  const calculateMarketCap = (
+    pricePerOunce: number,
+    supplyTons: number
+  ): number => {
+    return pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
+  };
 
-  try {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 2);
+  const calculatePriceChange = (
+    currentPrice: number,
+    previousPrice: number
+  ): number => {
+    return ((currentPrice - previousPrice) / previousPrice) * 100;
+  };
 
-    const formatDate = (date: Date): string => date.toISOString().split("T")[0];
-
-    const calculateMarketCap = (
-      pricePerOunce: number,
-      supplyTons: number
-    ): number => {
-      return pricePerOunce * supplyTons * METRIC_TON_TO_OUNCES;
-    };
-
-    const calculatePriceChange = (
-      currentPrice: number,
-      previousPrice: number
-    ): number => {
-      return ((currentPrice - previousPrice) / previousPrice) * 100;
-    };
-
-    const [goldPrice, silverPrice, yesterdayGold, yesterdaySilver] =
-      await Promise.all([
-        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
-        }),
-        axios.get<MetalPriceResponse>(`${API_ENDPOINTS.METAL_PRICE}/latest`, {
-          params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
-        }),
+  const fetchMetalPrice = async (
+    isYesterday: boolean = false
+  ): Promise<{ gold: number; silver: number; timestamp: number }> => {
+    const suffix = isYesterday ? "yesterday" : "latest";
+    try {
+      const [goldResponse, silverResponse] = await Promise.all([
         axios.get<MetalPriceResponse>(
-          `${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`,
+          `${API_ENDPOINTS.METAL_PRICE}/${suffix}`,
           {
             params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAU" },
           }
         ),
         axios.get<MetalPriceResponse>(
-          `${API_ENDPOINTS.METAL_PRICE}/${formatDate(yesterday)}`,
+          `${API_ENDPOINTS.METAL_PRICE}/${suffix}`,
           {
             params: { api_key: API_KEYS.METAL_PRICE, currencies: "XAG" },
           }
         ),
       ]);
 
-    console.log("goldPrice", goldPrice.data);
-    console.log("silverPrice", silverPrice.data);
+      return {
+        gold: goldResponse.data.rates?.USDXAU || 0,
+        silver: silverResponse.data.rates?.USDXAG || 0,
+        timestamp: goldResponse.data.timestamp,
+      };
+    } catch (error) {
+      console.error(`Error fetching metal prices for ${suffix}:`, error);
+      throw error;
+    }
+  };
 
-    const goldData: MarketData = goldPrice.data?.success
-      ? {
-          id: "gold",
-          name: "Gold",
-          symbol: "XAU/USD",
-          current_price: goldPrice.data.rates?.USDXAU || 0,
-          market_cap: calculateMarketCap(
-            goldPrice.data.rates?.USDXAU || 0,
-            GOLD_SUPPLY_TONS
-          ),
-          price_change_percentage_24h: calculatePriceChange(
-            goldPrice.data.rates?.USDXAU || 0,
-            yesterdayGold.data.rates?.USDXAU || 0
-          ),
-          type: "commodity",
-        }
-      : FALLBACK_DATA.commodities[0];
-    const silverData: MarketData = silverPrice.data?.success
-      ? {
-          id: "silver",
-          name: "Silver",
-          symbol: "XAG/USD",
-          current_price: silverPrice.data.rates?.USDXAG || 0,
-          market_cap: calculateMarketCap(
-            silverPrice.data.rates?.USDXAG || 0,
-            SILVER_SUPPLY_TONS
-          ),
-          price_change_percentage_24h: calculatePriceChange(
-            silverPrice.data.rates?.USDXAG || 0,
-            yesterdaySilver.data.rates?.USDXAG || 0
-          ),
-          type: "commodity",
-        }
-      : FALLBACK_DATA.commodities[1];
+  try {
+    let todayPrices: { gold: number; silver: number };
+    let yesterdayPrices: { gold: number; silver: number };
+    let fromCache = false;
 
-    const commodities = [goldData, silverData];
-
-    // Update cache if caching is enabled
     if (!disableCache) {
-      const now = Date.now();
-      await Promise.all([
-        redis.set(COMMODITIES_CACHE_KEY, commodities),
-        redis.set(`${COMMODITIES_CACHE_KEY}:timestamp`, now),
+      // Try to get today's cached data
+      let todayCacheKey = `${COMMODITIES_CACHE_KEY}:${formatDate(today)}`;
+      const cachedToday = await redis.get<{ gold: number; silver: number }>(
+        todayCacheKey
+      );
+
+      if (cachedToday) {
+        console.log("using cached today's commodity prices");
+        todayPrices = cachedToday;
+        fromCache = true;
+      } else {
+        todayPrices = await fetchMetalPrice();
+        await redis.set(todayCacheKey, todayPrices);
+      }
+
+      // Try to get yesterday's cached data
+      const yesterdayCacheKey = `${COMMODITIES_CACHE_KEY}:${formatDate(
+        yesterday
+      )}`;
+      const cachedYesterday = await redis.get<{ gold: number; silver: number }>(
+        yesterdayCacheKey
+      );
+
+      if (cachedYesterday) {
+        console.log("using cached yesterday's commodity prices");
+        yesterdayPrices = cachedYesterday;
+      } else {
+        yesterdayPrices = await fetchMetalPrice(true);
+        await redis.set(yesterdayCacheKey, yesterdayPrices);
+      }
+    } else {
+      [todayPrices, yesterdayPrices] = await Promise.all([
+        fetchMetalPrice(),
+        fetchMetalPrice(true),
       ]);
     }
 
-    return { data: commodities, fromCache: false };
+    const commodities: MarketData[] = [
+      {
+        id: "gold",
+        name: "Gold",
+        symbol: "XAU/USD",
+        current_price: todayPrices.gold,
+        market_cap: calculateMarketCap(todayPrices.gold, GOLD_SUPPLY_TONS),
+        price_change_percentage_24h: calculatePriceChange(
+          todayPrices.gold,
+          yesterdayPrices.gold
+        ),
+        type: "commodity",
+      },
+      {
+        id: "silver",
+        name: "Silver",
+        symbol: "XAG/USD",
+        current_price: todayPrices.silver,
+        market_cap: calculateMarketCap(todayPrices.silver, SILVER_SUPPLY_TONS),
+        price_change_percentage_24h: calculatePriceChange(
+          todayPrices.silver,
+          yesterdayPrices.silver
+        ),
+        type: "commodity",
+      },
+    ];
+
+    return { data: commodities, fromCache };
   } catch (error) {
     console.error("Error fetching commodity data:", error);
     return { data: FALLBACK_DATA.commodities, fromCache: false };
