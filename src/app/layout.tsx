@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     "Bitcoin, cryptocurrency, market comparison, real-time tracking, asset visualization, BTC price, market data, investment comparison, crypto tracking",
   authors: [{ name: "BitBeats" }],
   category: "Finance",
+  icons: {
+    icon: '/images/favicon.ico',
+  },
   openGraph: {
     title: "Bit Beats - Track Bitcoin's Dominance",
     description:
