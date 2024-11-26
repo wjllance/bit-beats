@@ -14,10 +14,10 @@ export const API_ENDPOINTS = {
 };
 
 // Cache configuration
-export const STOCK_CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+export const STOCK_CACHE_DURATION = 20 * 60 * 1000; // 20 mins in milliseconds
 export const COMMODITY_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-export const CRYPTO_CACHE_DURATION = 5 * 60 * 1000; // 2 minutes in milliseconds
-export const PRICE_HISTORY_CACHE_DURATION = 60 * 1000; // 60 seconds in milliseconds
+export const CRYPTO_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes in milliseconds
+export const PRICE_HISTORY_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes in milliseconds
 
 // Feature flags
 export const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
