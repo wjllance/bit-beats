@@ -10,37 +10,37 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const orbitron = Orbitron({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bit Beats - Track Bitcoin's Dominance",
+  title: "BTC Hits - Tracking Bitcoin's Rise in the Market Cap Arena",
   description:
-    "Watch Bitcoin beat other assets in real-time with market tracking and visualization. Compare Bitcoin's performance against stocks, commodities, and other assets with real-time data and interactive charts.",
+    "Track Bitcoin's journey to the top of global market capitalization. Compare Bitcoin's market cap against major companies, assets, and indices with real-time data and interactive visualizations.",
   keywords:
-    "Bitcoin, cryptocurrency, market comparison, real-time tracking, asset visualization, BTC price, market data, investment comparison, crypto tracking",
-  authors: [{ name: "BitBeats" }],
+    "Bitcoin market cap, cryptocurrency market capitalization, BTC vs companies, market cap comparison, real-time tracking, Bitcoin dominance, top assets by market cap, investment analysis, crypto market data",
+  authors: [{ name: "BTC Hits" }],
   category: "Finance",
   icons: {
-    icon: '/images/favicon.ico',
+    icon: "/images/favicon.ico",
   },
   openGraph: {
-    title: "Bit Beats - Track Bitcoin's Dominance",
+    title: "BTC Hits - Tracking Bitcoin's Rise in the Market Cap Arena",
     description:
-      "Watch Bitcoin beat other assets in real-time with market tracking and visualization",
+      "Track Bitcoin's journey to the top of global market capitalization with real-time data and interactive visualizations",
     type: "website",
-    siteName: "BitBeats",
+    siteName: "BTC Hits",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "BitBeats - Real-time Bitcoin Performance Tracking",
+        alt: "BTC Hits - Tracking Bitcoin's Rise in the Market Cap Arena",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bit Beats - Track Bitcoin's Dominance",
+    title: "BTC Hits - Tracking Bitcoin's Rise in the Market Cap Arena",
     description:
-      "Watch Bitcoin beat other assets in real-time with market tracking and visualization",
+      "Track Bitcoin's journey to the top of global market capitalization with real-time data and interactive visualizations",
     images: ["/og-image.png"],
   },
   robots: {
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     google: "google-site-verification-code", // You'll need to replace this with your actual verification code
   },
   alternates: {
-    canonical: "https://btcbeats.com",
+    canonical: "https://btchits.top",
   },
 };
 

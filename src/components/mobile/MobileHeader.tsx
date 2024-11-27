@@ -5,16 +5,16 @@ import clsx from "clsx";
 import Image from "next/image";
 
 const SLOGANS = [
-  "Watch Bitcoin Rise to the Top",
-  "Ride the Digital Gold Wave",
-  "The Future of Finance is Here",
-  "Decentralized. Secure. Revolutionary.",
-  "Beyond Traditional Boundaries",
-  "Financial Freedom Awaits",
-  "Join the Crypto Revolution",
-  "Where Innovation Meets Value",
+  "Tracking Bitcoin's Market Cap Rise",
+  "The Next Global Market Leader",
+  "Beyond Traditional Market Caps",
+  "Decentralized. Valued. Revolutionary.",
+  "Redefining Market Dominance",
+  "Financial Evolution in Numbers",
+  "Join the Market Cap Revolution",
+  "Where Value Meets Dominance",
   "Empowering Digital Wealth",
-  "The Beat of Digital Currency",
+  "The Pulse of Market Capitalization",
 ];
 
 export default function MobileHeader() {
@@ -42,7 +42,7 @@ export default function MobileHeader() {
       </div>
       <div className="flex flex-col">
         <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text tracking-tight leading-none">
-          Bit Beats
+          BTC Hits
         </h1>
         <p
           className={clsx(

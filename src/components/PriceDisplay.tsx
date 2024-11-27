@@ -14,16 +14,16 @@ interface PriceDisplayProps {
 }
 
 const SLOGANS = [
-  "Watch Bitcoin Rise to the Top",
-  "Ride the Digital Gold Wave",
-  "The Future of Finance is Here",
-  "Decentralized. Secure. Revolutionary.",
-  "Beyond Traditional Boundaries",
-  "Financial Freedom Awaits",
-  "Join the Crypto Revolution",
-  "Where Innovation Meets Value",
+  "Tracking Bitcoin's Market Cap Rise",
+  "The Next Global Market Leader",
+  "Beyond Traditional Market Caps",
+  "Decentralized. Valued. Revolutionary.",
+  "Redefining Market Dominance",
+  "Financial Evolution in Numbers",
+  "Join the Market Cap Revolution",
+  "Where Value Meets Dominance",
   "Empowering Digital Wealth",
-  "The Beat of Digital Currency",
+  "The Pulse of Market Capitalization",
 ];
 
 const formatPrice = (price: number | undefined): string => {
@@ -80,7 +80,7 @@ export default function PriceDisplay({
             </div>
 
             <h1 className="ml-4 text-3xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 text-transparent bg-clip-text group-hover:from-yellow-400 group-hover:via-yellow-200 group-hover:to-yellow-400 transition-all duration-300">
-              Bit Beats
+              BTC Hits
             </h1>
           </div>
 
