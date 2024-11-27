@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import MobileBitcoinChart from "@/components/mobile/MobileBitcoinChart";
 import MobileTopAssets from "@/components/mobile/MobileTopAssets";
 import MobileTimeframeSelector from "@/components/mobile/MobileTimeframeSelector";
