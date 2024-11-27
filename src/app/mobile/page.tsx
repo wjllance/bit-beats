@@ -39,15 +39,15 @@ export default function MobilePage() {
       const scrollTop = container.scrollTop;
       const progress = Math.min(Math.max(scrollTop / SCROLL_RANGE, 0), 1);
       const easedProgress = easeOutQuad(progress);
-      
+
       // Calculate container height and scale
       const heightDiff = INITIAL_CHART_HEIGHT - MIN_CHART_HEIGHT;
-      const newHeight = INITIAL_CHART_HEIGHT - (heightDiff * easedProgress);
+      const newHeight = INITIAL_CHART_HEIGHT - heightDiff * easedProgress;
       const scale = newHeight / INITIAL_CHART_HEIGHT;
-      
+
       setContainerHeight(Math.max(Math.round(newHeight), MIN_CHART_HEIGHT));
       chartContent.style.transform = `scaleY(${scale})`;
-      
+
       ticking = false;
     };
 
@@ -103,22 +103,22 @@ export default function MobilePage() {
       {/* Fixed Section Container */}
       <div className="bg-gray-900 sticky top-[72px] z-10">
         {/* Chart Container */}
-        <div 
+        <div
           ref={chartContainerRef}
           className="overflow-hidden"
           style={{
             height: `${containerHeight}px`,
             minHeight: `${MIN_CHART_HEIGHT}px`,
-            transition: 'height 0.15s ease-out'
+            transition: "height 0.15s ease-out",
           }}
         >
-          <div 
+          <div
             ref={chartContentRef}
             className="h-full origin-top"
             style={{
-              transform: 'scaleY(1)',
-              transition: 'transform 0.15s ease-out',
-              willChange: 'transform'
+              transform: "scaleY(1)",
+              transition: "transform 0.15s ease-out",
+              willChange: "transform",
             }}
           >
             <MobileBitcoinChart
@@ -129,7 +129,7 @@ export default function MobilePage() {
         </div>
 
         {/* Timeframe Selector */}
-        <div className="px-3 py-2 border-b border-gray-800">
+        <div className="px-3 py-1 border-b border-gray-800 bg-gray-900/95">
           <MobileTimeframeSelector
             selectedTimeframe={selectedTimeframe}
             onTimeframeChange={setSelectedTimeframe}
