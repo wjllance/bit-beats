@@ -28,9 +28,9 @@ export default function MobilePage() {
       : null;
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white">
+    <main className="min-h-screen bg-gray-900 text-white flex flex-col h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
+      <div className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
         <div className="px-3 py-2">
           {/* Title and Price Row */}
           <div className="flex items-center justify-between mb-1.5">
@@ -48,20 +48,19 @@ export default function MobilePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-4">
-        {/* Chart Section */}
-        <div className="relative">
-          <div className="h-[130px] w-full">
-            <MobileBitcoinChart selectedTimeframe={selectedTimeframe} />
-          </div>
-          <MobileTimeframeSelector
-            selectedTimeframe={selectedTimeframe}
-            onTimeframeChange={setSelectedTimeframe}
-          />
+      {/* Chart Section - Fixed */}
+      <div className="relative">
+        <div className="h-[130px] w-full">
+          <MobileBitcoinChart selectedTimeframe={selectedTimeframe} />
         </div>
+        <MobileTimeframeSelector
+          selectedTimeframe={selectedTimeframe}
+          onTimeframeChange={setSelectedTimeframe}
+        />
+      </div>
 
-        {/* Top Assets */}
+      {/* Top Assets - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
         <div className="pb-safe-area-inset-bottom">
           <MobileTopAssets />
         </div>
