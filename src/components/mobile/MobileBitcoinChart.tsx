@@ -28,9 +28,10 @@ ChartJS.register(
 
 interface MobileBitcoinChartProps {
   selectedTimeframe: TimeframeOption;
+  height: number;
 }
 
-export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinChartProps): JSX.Element {
+export default function MobileBitcoinChart({ selectedTimeframe, height }: MobileBitcoinChartProps): JSX.Element {
   const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
 
   const options: ChartOptions<'line'> = {
@@ -142,8 +143,8 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
   }
 
   return (
-    <div className="w-full">
-      <div className="relative h-[130px] w-full px-4">
+    <div className="w-full h-full" style={{ minHeight: `${height}px` }}>
+      <div className="relative w-full h-full px-4" style={{ minHeight: `${height}px` }}>
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/30 rounded-lg">
             <div className="flex flex-col items-center space-y-2">
@@ -152,8 +153,8 @@ export default function MobileBitcoinChart({ selectedTimeframe }: MobileBitcoinC
             </div>
           </div>
         ) : (
-          <div className="h-full rounded-lg overflow-hidden bg-gray-800/30">
-            <Line options={options} data={data} />
+          <div className="h-full rounded-lg overflow-hidden bg-gray-800/30" style={{ minHeight: `${height}px` }}>
+            <Line options={options} data={data} height={height} />
           </div>
         )}
       </div>
