@@ -9,17 +9,9 @@ import PriceStatusBadge from "@/components/mobile/PriceStatusBadge";
 import PriceDisplay from "@/components/mobile/PriceDisplay";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
 
-// Debounce helper
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
+const INITIAL_CHART_HEIGHT = 150;
+const MIN_CHART_HEIGHT = 80;
+const SCROLL_RANGE = 100;
 
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState({
@@ -29,93 +21,47 @@ export default function MobilePage() {
   const { priceData, isLoading, error } = usePriceHistory(selectedTimeframe);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [chartHeight, setChartHeight] = useState(130);
-  const INITIAL_CHART_HEIGHT = 130;
-  const MIN_CHART_HEIGHT = 80;
-  const SCROLL_RANGE = 100;
-
-  // Debounced chart update
-  const debouncedChartUpdate = useCallback(
-    debounce(() => {
-      setIsScrolling(false);
-    }, 150),
-    []
-  );
-
-  const calculateChartHeight = useCallback((scrollTop: number) => {
-    const headerHeight = headerRef.current?.offsetHeight || 0;
-    const viewportHeight = window.innerHeight;
-    const scrollableHeight = viewportHeight - headerHeight;
-
-    // Calculate progress based on scroll position relative to viewport
-    const scrollProgress = Math.min(Math.max(scrollTop / SCROLL_RANGE, 0), 1);
-
-    // Calculate new height with easing
-    const heightDiff = INITIAL_CHART_HEIGHT - MIN_CHART_HEIGHT;
-    const newHeight =
-      INITIAL_CHART_HEIGHT - heightDiff * easeOutQuad(scrollProgress);
-
-    return Math.max(Math.round(newHeight), MIN_CHART_HEIGHT);
-  }, []);
-
-  // Easing function for smoother height transition
-  const easeOutQuad = (t: number): number => {
-    return t * (2 - t);
-  };
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartHeight, setChartHeight] = useState(INITIAL_CHART_HEIGHT);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    const chartContainer = chartContainerRef.current;
+    if (!container || !chartContainer) return;
 
-    let touchStartY = 0;
-    let lastScrollTop = 0;
-    let rafId: number;
+    let ticking = false;
+    let lastScrollY = 0;
 
-    const handleScroll = () => {
+    const updateChartHeight = () => {
       const scrollTop = container.scrollTop;
+      const progress = Math.min(Math.max(scrollTop / SCROLL_RANGE, 0), 1);
+      const heightDiff = INITIAL_CHART_HEIGHT - MIN_CHART_HEIGHT;
+      const newHeight = INITIAL_CHART_HEIGHT - (progress * heightDiff);
+      
+      // Update both height and transform
+      setChartHeight(Math.max(newHeight, MIN_CHART_HEIGHT));
+      const scale = newHeight / INITIAL_CHART_HEIGHT;
+      chartContainer.style.transform = `scaleY(${scale})`;
+      ticking = false;
+    };
 
-      // Use requestAnimationFrame for smooth updates
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+    const onScroll = () => {
+      lastScrollY = container.scrollTop;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateChartHeight();
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      rafId = requestAnimationFrame(() => {
-        const newHeight = calculateChartHeight(scrollTop);
-        console.log("newHeight", newHeight);
-        setChartHeight(newHeight);
-        setIsScrolling(true);
-        setScrollProgress(scrollTop / SCROLL_RANGE);
-        lastScrollTop = scrollTop;
-        debouncedChartUpdate();
-      });
     };
 
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-      setIsScrolling(true);
-    };
-
-    const handleTouchEnd = () => {
-      debouncedChartUpdate();
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    container.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-    });
-    container.addEventListener("touchend", handleTouchEnd, { passive: true });
+    container.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
-      container.removeEventListener("scroll", handleScroll);
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchend", handleTouchEnd);
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-      }
+      container.removeEventListener("scroll", onScroll);
     };
-  }, [debouncedChartUpdate, calculateChartHeight]);
+  }, []);
 
   // Calculate 24h price change
   const currentPrice = priceData.prices[priceData.prices.length - 1];
@@ -151,22 +97,27 @@ export default function MobilePage() {
       </div>
 
       {/* Chart Section - Fixed */}
-      <div
-        className="bg-gray-900 sticky top-[72px] z-10"
+      <div 
+        className="bg-gray-900 sticky top-[72px] z-10 overflow-hidden"
         style={{
           height: `${chartHeight}px`,
           minHeight: `${MIN_CHART_HEIGHT}px`,
-          transition: isScrolling ? "none" : "height 0.2s ease-out",
+          transition: 'height 0.1s linear'
         }}
       >
-        {!isScrolling && (
-          <div className="h-full" style={{ minHeight: `${MIN_CHART_HEIGHT}px` }}>
-            <MobileBitcoinChart
-              selectedTimeframe={selectedTimeframe}
-              height={chartHeight}
-            />
-          </div>
-        )}
+        <div 
+          ref={chartContainerRef}
+          className="h-full origin-top"
+          style={{
+            transform: 'scaleY(1)',
+            transition: 'transform 0.1s linear',
+          }}
+        >
+          <MobileBitcoinChart
+            selectedTimeframe={selectedTimeframe}
+            height={INITIAL_CHART_HEIGHT}
+          />
+        </div>
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <MobileTimeframeSelector
             selectedTimeframe={selectedTimeframe}
@@ -176,8 +127,13 @@ export default function MobilePage() {
       </div>
 
       {/* Scrollable Container */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        {/* Content that scrolls under the fixed sections */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto"
+        style={{
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         <div className="relative">
           <div className="pb-safe-area-inset-bottom">
             <MobileTopAssets />
