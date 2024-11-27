@@ -13,6 +13,9 @@ const INITIAL_CHART_HEIGHT = 150;
 const MIN_CHART_HEIGHT = 80;
 const SCROLL_RANGE = 100;
 
+// Easing function for smoother transitions
+const easeOutQuad = (t: number): number => t * (2 - t);
+
 export default function MobilePage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState({
     label: "24h",
@@ -22,35 +25,36 @@ export default function MobilePage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [chartHeight, setChartHeight] = useState(INITIAL_CHART_HEIGHT);
+  const chartContentRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(INITIAL_CHART_HEIGHT);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
-    const chartContainer = chartContainerRef.current;
-    if (!container || !chartContainer) return;
+    const chartContent = chartContentRef.current;
+    if (!container || !chartContent) return;
 
     let ticking = false;
-    let lastScrollY = 0;
 
     const updateChartHeight = () => {
       const scrollTop = container.scrollTop;
       const progress = Math.min(Math.max(scrollTop / SCROLL_RANGE, 0), 1);
-      const heightDiff = INITIAL_CHART_HEIGHT - MIN_CHART_HEIGHT;
-      const newHeight = INITIAL_CHART_HEIGHT - (progress * heightDiff);
+      const easedProgress = easeOutQuad(progress);
       
-      // Update both height and transform
-      setChartHeight(Math.max(newHeight, MIN_CHART_HEIGHT));
+      // Calculate container height and scale
+      const heightDiff = INITIAL_CHART_HEIGHT - MIN_CHART_HEIGHT;
+      const newHeight = INITIAL_CHART_HEIGHT - (heightDiff * easedProgress);
       const scale = newHeight / INITIAL_CHART_HEIGHT;
-      chartContainer.style.transform = `scaleY(${scale})`;
+      
+      setContainerHeight(Math.max(Math.round(newHeight), MIN_CHART_HEIGHT));
+      chartContent.style.transform = `scaleY(${scale})`;
+      
       ticking = false;
     };
 
     const onScroll = () => {
-      lastScrollY = container.scrollTop;
       if (!ticking) {
         requestAnimationFrame(() => {
           updateChartHeight();
-          ticking = false;
         });
         ticking = true;
       }
@@ -96,29 +100,36 @@ export default function MobilePage() {
         </div>
       </div>
 
-      {/* Chart Section - Fixed */}
-      <div 
-        className="bg-gray-900 sticky top-[72px] z-10 overflow-hidden"
-        style={{
-          height: `${chartHeight}px`,
-          minHeight: `${MIN_CHART_HEIGHT}px`,
-          transition: 'height 0.1s linear'
-        }}
-      >
+      {/* Fixed Section Container */}
+      <div className="bg-gray-900 sticky top-[72px] z-10">
+        {/* Chart Container */}
         <div 
           ref={chartContainerRef}
-          className="h-full origin-top"
+          className="overflow-hidden"
           style={{
-            transform: 'scaleY(1)',
-            transition: 'transform 0.1s linear',
+            height: `${containerHeight}px`,
+            minHeight: `${MIN_CHART_HEIGHT}px`,
+            transition: 'height 0.15s ease-out'
           }}
         >
-          <MobileBitcoinChart
-            selectedTimeframe={selectedTimeframe}
-            height={INITIAL_CHART_HEIGHT}
-          />
+          <div 
+            ref={chartContentRef}
+            className="h-full origin-top"
+            style={{
+              transform: 'scaleY(1)',
+              transition: 'transform 0.15s ease-out',
+              willChange: 'transform'
+            }}
+          >
+            <MobileBitcoinChart
+              selectedTimeframe={selectedTimeframe}
+              height={INITIAL_CHART_HEIGHT}
+            />
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 z-10">
+
+        {/* Timeframe Selector */}
+        <div className="px-3 py-2 border-b border-gray-800">
           <MobileTimeframeSelector
             selectedTimeframe={selectedTimeframe}
             onTimeframeChange={setSelectedTimeframe}
