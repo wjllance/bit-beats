@@ -41,8 +41,8 @@ const POPULAR_STOCKS = [
   "UNH",
   "2222.SR",
 ];
-const GOLD_SUPPLY_TONS = 205000;
-const SILVER_SUPPLY_TONS = 1751000;
+const GOLD_SUPPLY_TONS = 216265;
+const SILVER_SUPPLY_TONS = 1740000;
 const METRIC_TON_TO_OUNCES = 35274;
 const SAR_TO_USD = 0.2666; // 1 SAR = 0.2666 USD (fixed rate for Saudi Riyal)
 
