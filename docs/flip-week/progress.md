@@ -25,7 +25,7 @@
 | 2 | 2026-05-29 | Publish methodology page and run dunk test with 2-3 reviewers | In progress | `/methodology` page exists. Needs local browser/build check and external reviewer feedback. |
 | 3 | 2026-05-30 | Build Data API and request logging | Done | Data API and request logging are implemented. |
 | 4 | 2026-05-31 | Build Image API template | Done | `/img/[image]` supports all six targets plus `btc-next.png`. |
-| 5 | 2026-06-01 | Stabilize image URLs, cache behavior, and visual QA | In progress | Local PNG smoke test passed for `btc-vs-gold.png` and `btc-next.png`; one image was visually inspected. |
+| 5 | 2026-06-01 | Stabilize image URLs, cache behavior, and visual QA | Done | All seven production image URLs returned valid 1200x630 PNG files; one image was visually inspected. |
 | 6 | 2026-06-02 | Run seed test with 20 targets | In progress | Seed test script and tracking template created. Needs deployed URLs and outreach. |
 | 7 | 2026-06-03 | Fix reuse blockers and decide continue/kill | Pending | Deadline buffer until 2026-06-04. |
 
@@ -105,11 +105,11 @@ Send three links:
 - 2026-05-29: Local smoke test generated valid 1200x630 PNG files for `/img/btc-vs-gold.png?ref=smoke` and `/img/btc-next.png?ref=smoke`.
 - 2026-05-29: Unsupported image smoke test returned 404 for `/img/btc-vs-amazon.png`.
 - 2026-05-29: Vercel production smoke test passed for `/methodology`, `/api/flip/btc/gold?ref=deploy_smoke`, `/img/btc-next.png?ref=deploy_smoke`, and unsupported image 404.
+- 2026-05-29: Warm check passed for all seven production image URLs with `?ref=warm_check`; each returned HTTP 200 and valid PNG data.
 
 ## Next Action
 
 Prepare external review:
 
 - Send `/methodology` to 2-3 knowledgeable reviewers for dunk testing.
-- Warm/check all seven image URLs after deployment.
 - Fill the seed list and send the outreach message to 20 targets.
