@@ -22,11 +22,11 @@
 | Day | Date | Target | Status | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-05-28 | Lock methodology, assets, metrics, docs, seed list shape | Done | Created sprint docs, asset config, metric formulas, and formula tests. |
-| 2 | 2026-05-29 | Publish methodology page and run dunk test with 2-3 reviewers | In progress | `/methodology` page exists. Needs local browser/build check and external reviewer feedback. |
+| 2 | 2026-05-29 | Publish methodology page and run dunk test with 2-3 reviewers | In progress | `/methodology` page exists and reviewer packet is ready. Needs external reviewer feedback. |
 | 3 | 2026-05-30 | Build Data API and request logging | Done | Data API and request logging are implemented. |
 | 4 | 2026-05-31 | Build Image API template | Done | `/img/[image]` supports all six targets plus `btc-next.png`. |
 | 5 | 2026-06-01 | Stabilize image URLs, cache behavior, and visual QA | Done | All seven production image URLs returned valid 1200x630 PNG files; one image was visually inspected. |
-| 6 | 2026-06-02 | Run seed test with 20 targets | In progress | Seed test script and tracking template created. Needs deployed URLs and outreach. |
+| 6 | 2026-06-02 | Run seed test with 20 targets | In progress | Seed test script now uses deployed URLs. Needs outreach. |
 | 7 | 2026-06-03 | Fix reuse blockers and decide continue/kill | Pending | Deadline buffer until 2026-06-04. |
 
 ## Current Scope
@@ -91,6 +91,8 @@ Send three links:
 - 2026-05-29: Seed test script and 20-person tracking template created in `docs/flip-week/seed-test.md`.
 - 2026-05-29: Deployed to Vercel under `junlin-wus-projects/btcbeats` and aliased to `https://btcbeats-ten.vercel.app`.
 - 2026-05-29: Upgraded Next.js to `15.5.18` after Vercel rejected `15.0.3` as vulnerable.
+- 2026-05-29: Added methodology dunk-test packet in `docs/flip-week/methodology-review.md`.
+- 2026-05-29: Updated seed-test links to use the deployed `https://btcbeats-ten.vercel.app` URL.
 
 ## Verification Log
 
@@ -111,5 +113,5 @@ Send three links:
 
 Prepare external review:
 
-- Send `/methodology` to 2-3 knowledgeable reviewers for dunk testing.
-- Fill the seed list and send the outreach message to 20 targets.
+- Send `docs/flip-week/methodology-review.md` ask to 2-3 knowledgeable reviewers.
+- Fill the seed list in `docs/flip-week/seed-test.md` and send the outreach message to 20 targets.

@@ -13,13 +13,13 @@ Would you put this image in your next tweet, newsletter, group chat, or article?
 If not, what blocks you?
 
 Ready image:
-https://btchits.top/img/btc-next.png?ref=seed_<id>
+https://btcbeats-ten.vercel.app/img/btc-next.png?ref=seed_<id>
 
 Methodology:
-https://btchits.top/methodology?ref=seed_<id>
+https://btcbeats-ten.vercel.app/methodology?ref=seed_<id>
 
 Target example:
-https://btchits.top/img/btc-vs-gold.png?ref=seed_<id>
+https://btcbeats-ten.vercel.app/img/btc-vs-gold.png?ref=seed_<id>
 ```
 
 More context if they ask:
@@ -53,6 +53,18 @@ I'm specifically looking for blockers: unclear formula, weak source trust, bad v
 | seed_018 |  |  |  |  |  |  |  |
 | seed_019 |  |  |  |  |  |  |  |
 | seed_020 |  |  |  |  |  |  |  |
+
+## Live Links
+
+- Ready image: `https://btcbeats-ten.vercel.app/img/btc-next.png?ref=seed_<id>`
+- Methodology: `https://btcbeats-ten.vercel.app/methodology?ref=seed_<id>`
+- Target example: `https://btcbeats-ten.vercel.app/img/btc-vs-gold.png?ref=seed_<id>`
+- Gold: `https://btcbeats-ten.vercel.app/img/btc-vs-gold.png`
+- Silver: `https://btcbeats-ten.vercel.app/img/btc-vs-silver.png`
+- NVIDIA: `https://btcbeats-ten.vercel.app/img/btc-vs-nvidia.png`
+- Apple: `https://btcbeats-ten.vercel.app/img/btc-vs-apple.png`
+- Microsoft: `https://btcbeats-ten.vercel.app/img/btc-vs-microsoft.png`
+- Tesla: `https://btcbeats-ten.vercel.app/img/btc-vs-tesla.png`
 
 ## Response Classification
 
