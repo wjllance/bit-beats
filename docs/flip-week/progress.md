@@ -60,6 +60,12 @@
 - User accounts.
 - Multiple image styles.
 
+## Public Deployment
+
+- Production alias: `https://btcbeats-ten.vercel.app`
+- Deployment URL: `https://btcbeats-g3vuj3b7c-junlin-wus-projects.vercel.app`
+- Inspector: `https://vercel.com/junlin-wus-projects/btcbeats/3jPY7NJtXszKLPPZwFZrFKc7ek3J`
+
 ## Seed Test Script
 
 Ask one specific action question:
@@ -83,6 +89,8 @@ Send three links:
 - 2026-05-29: Image API implemented as one 1200x630 PNG template for all configured targets and next target.
 - 2026-05-29: Added `metadataBase` for stable social image URL resolution.
 - 2026-05-29: Seed test script and 20-person tracking template created in `docs/flip-week/seed-test.md`.
+- 2026-05-29: Deployed to Vercel under `junlin-wus-projects/btcbeats` and aliased to `https://btcbeats-ten.vercel.app`.
+- 2026-05-29: Upgraded Next.js to `15.5.18` after Vercel rejected `15.0.3` as vulnerable.
 
 ## Verification Log
 
@@ -96,12 +104,12 @@ Send three links:
 - 2026-05-29: `yarn build` passed.
 - 2026-05-29: Local smoke test generated valid 1200x630 PNG files for `/img/btc-vs-gold.png?ref=smoke` and `/img/btc-next.png?ref=smoke`.
 - 2026-05-29: Unsupported image smoke test returned 404 for `/img/btc-vs-amazon.png`.
+- 2026-05-29: Vercel production smoke test passed for `/methodology`, `/api/flip/btc/gold?ref=deploy_smoke`, `/img/btc-next.png?ref=deploy_smoke`, and unsupported image 404.
 
 ## Next Action
 
-Prepare deployment and external review:
+Prepare external review:
 
-- Deploy the current branch or merge path to a public URL.
 - Send `/methodology` to 2-3 knowledgeable reviewers for dunk testing.
 - Warm/check all seven image URLs after deployment.
 - Fill the seed list and send the outreach message to 20 targets.
