@@ -4,10 +4,14 @@ import {
   FLIP_TARGETS,
   METHODOLOGY_PATH,
 } from "@/lib/flip/assets";
+import { logFlipRequest } from "@/lib/flip/logging";
 import { getCacheHeaders } from "@/lib/flip/snapshot";
 
 export async function GET(request: Request) {
   const origin = new URL(request.url).origin;
+  await logFlipRequest(request, {
+    endpoint: "api.assets",
+  });
 
   return NextResponse.json(
     {

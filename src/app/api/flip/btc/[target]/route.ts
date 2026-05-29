@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupportedTargetSlugs } from "@/lib/flip/assets";
+import { logFlipRequest } from "@/lib/flip/logging";
 import { formatTargetSlug } from "@/lib/flip/metrics";
 import { getCacheHeaders, getFlipResponse } from "@/lib/flip/snapshot";
 
@@ -13,6 +14,10 @@ export async function GET(request: Request, context: RouteContext) {
   const { target } = await context.params;
   const targetSlug = formatTargetSlug(target);
   const supportedTargets = getSupportedTargetSlugs();
+  await logFlipRequest(request, {
+    endpoint: "api.flip.target",
+    target: targetSlug,
+  });
 
   if (!supportedTargets.includes(targetSlug as never)) {
     return NextResponse.json(

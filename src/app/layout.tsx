@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const orbitron = Orbitron({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://btchits.top"),
   title: "BTC Hits - Tracking Bitcoin's Rise in the Market Cap Arena",
   description:
     "Track Bitcoin's journey to the top of global market capitalization. Compare Bitcoin's market cap against major companies, assets, and indices with real-time data and interactive visualizations.",

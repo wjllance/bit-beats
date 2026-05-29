@@ -23,10 +23,10 @@
 | --- | --- | --- | --- | --- |
 | 1 | 2026-05-28 | Lock methodology, assets, metrics, docs, seed list shape | Done | Created sprint docs, asset config, metric formulas, and formula tests. |
 | 2 | 2026-05-29 | Publish methodology page and run dunk test with 2-3 reviewers | In progress | `/methodology` page exists. Needs local browser/build check and external reviewer feedback. |
-| 3 | 2026-05-30 | Build Data API and request logging | In progress | Data API exists and passed smoke tests. Request logging is still pending. |
-| 4 | 2026-05-31 | Build Image API template | Pending |  |
-| 5 | 2026-06-01 | Stabilize image URLs, cache behavior, and visual QA | Pending |  |
-| 6 | 2026-06-02 | Run seed test with 20 targets | Pending |  |
+| 3 | 2026-05-30 | Build Data API and request logging | Done | Data API and request logging are implemented. |
+| 4 | 2026-05-31 | Build Image API template | Done | `/img/[image]` supports all six targets plus `btc-next.png`. |
+| 5 | 2026-06-01 | Stabilize image URLs, cache behavior, and visual QA | In progress | Local PNG smoke test passed for `btc-vs-gold.png` and `btc-next.png`; one image was visually inspected. |
+| 6 | 2026-06-02 | Run seed test with 20 targets | In progress | Seed test script and tracking template created. Needs deployed URLs and outreach. |
 | 7 | 2026-06-03 | Fix reuse blockers and decide continue/kill | Pending | Deadline buffer until 2026-06-04. |
 
 ## Current Scope
@@ -79,6 +79,10 @@ Send three links:
 - 2026-05-28: Locked target list to Gold, Silver, NVIDIA, Apple, Microsoft, and Tesla.
 - 2026-05-28: Formula convention set: if BTC already exceeds a target, remaining gap is reported as `0` and 24h gap change is based on clamped gaps.
 - 2026-05-28: Data API shape implemented for `/api/assets`, `/api/flip/btc/[target]`, and `/api/flip/btc/next`.
+- 2026-05-29: Request logging implemented with endpoint, target, referrer, user agent, optional `ref`, and SHA-256 IP hash. Raw IP addresses are not stored.
+- 2026-05-29: Image API implemented as one 1200x630 PNG template for all configured targets and next target.
+- 2026-05-29: Added `metadataBase` for stable social image URL resolution.
+- 2026-05-29: Seed test script and 20-person tracking template created in `docs/flip-week/seed-test.md`.
 
 ## Verification Log
 
@@ -86,11 +90,18 @@ Send three links:
 - 2026-05-28: `yarn lint` passed.
 - 2026-05-28: `yarn tsc --noEmit` passed.
 - 2026-05-28: Local smoke test passed for `/methodology`, `/api/assets`, `/api/flip/btc/gold`, and `/api/flip/btc/next`.
+- 2026-05-29: `yarn test:flip` passed.
+- 2026-05-29: `yarn lint` passed.
+- 2026-05-29: `yarn tsc --noEmit` passed.
+- 2026-05-29: `yarn build` passed.
+- 2026-05-29: Local smoke test generated valid 1200x630 PNG files for `/img/btc-vs-gold.png?ref=smoke` and `/img/btc-next.png?ref=smoke`.
+- 2026-05-29: Unsupported image smoke test returned 404 for `/img/btc-vs-amazon.png`.
 
 ## Next Action
 
-Implement request logging, then start the Image API:
+Prepare deployment and external review:
 
-- Log endpoint, target, referrer, user agent, optional `ref`, and SHA-256 IP hash.
-- Add `/img/btc-vs-gold.png` and `/img/btc-next.png` first.
-- Keep one visual template only.
+- Deploy the current branch or merge path to a public URL.
+- Send `/methodology` to 2-3 knowledgeable reviewers for dunk testing.
+- Warm/check all seven image URLs after deployment.
+- Fill the seed list and send the outreach message to 20 targets.
